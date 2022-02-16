@@ -263,8 +263,8 @@ logic  [31:0]               cache_mem_dout1          ; // Read Data
 // 2KB SRAM spitted into 2DFFRAM with 1KB Each
 // -------------------------------------------------------------------------
 
-input  logic                       cache_dffram_en        ; // CLK
-input  logic    [8:0]              cache_dffram_addr      ; // Address
+logic                       cache_dffram_en        ; // CLK
+logic    [8:0]              cache_dffram_addr      ; // Address
 
 
 assign cache_dffram_en     =  !(cache_mem_csb0 & cache_mem_csb1);

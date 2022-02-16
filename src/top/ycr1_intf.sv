@@ -443,9 +443,7 @@ ycr1_reset_and2_cell i_tapc_rstn_and2_cell (
 //-------------------------------------------------------------------------------
 // TCM instance
 //-------------------------------------------------------------------------------
-ycr1_tcm_router #(
-    .YCR1_TCM_SIZE  (`YCR1_DMEM_AWIDTH'(~YCR1_TCM_ADDR_MASK + 1'b1))
-) i_tcm (
+ycr1_tcm_router i_tcm (
     .clk            (core_clk        ),
     .rst_n          (core_rst_n_local),
 
