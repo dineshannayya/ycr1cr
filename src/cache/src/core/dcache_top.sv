@@ -184,20 +184,21 @@ module dcache_top #(
         input logic                        wb_app_lack_i,// last acknowlegement
         input logic                        wb_app_err_i, // error
 
-        // CACHE SRAM Memory I/F
-        output logic                       cache_mem_clk0           , // CLK
-        output logic                       cache_mem_csb0           , // CS#
-        output logic                       cache_mem_web0           , // WE#
-        output logic   [8:0]               cache_mem_addr0          , // Address
-        output logic   [3:0]               cache_mem_wmask0         , // WMASK#
-        output logic   [31:0]              cache_mem_din0           , // Write Data
-        input  logic   [31:0]              cache_mem_dout0          , // Read Data
+	// DFFRAM I/F
+
+        output logic                       cache_dffram_clk0        , // CLK
+        output logic                       cache_dffram_cs0         , // Chip Select
+        output logic    [7:0]              cache_dffram_addr0       , // Address
+        output logic    [3:0]              cache_dffram_wmask0      , // Write Mask
+        output logic    [31:0]             cache_dffram_din0        , // Write Data
+        input  logic    [31:0]             cache_dffram_dout0       , // Read Data
         
-        // SRAM-0 PORT-1, IMEM I/F
-        output logic                       cache_mem_clk1           , // CLK
-        output logic                       cache_mem_csb1           , // CS#
-        output logic  [8:0]                cache_mem_addr1          , // Address
-        input  logic  [31:0]               cache_mem_dout1           // Read Data
+        output logic                       cache_dffram_clk1        , // CLK
+        output logic                       cache_dffram_cs1         , // Chip Select
+        output logic    [7:0]              cache_dffram_addr1       , // Address
+        output logic    [3:0]              cache_dffram_wmask1      , // Write Mask
+        output logic    [31:0]             cache_dffram_din1        , // Write Data
+        input  logic    [31:0]             cache_dffram_dout1        // Read Data
 
 );
 
@@ -281,8 +282,56 @@ logic                             wb_app_ack_l             ; // Register check i
 logic                             cache_busy               ;
 
 
-assign  cache_mem_clk0   = mclk;
-assign  cache_mem_clk1   = mclk;
+// CACHE SRAM Memory I/F
+logic                       cache_mem_clk0           ; // CLK
+logic                       cache_mem_csb0           ; // CS#
+logic                       cache_mem_web0           ; // WE#
+logic   [8:0]               cache_mem_addr0          ; // Address
+logic   [3:0]               cache_mem_wmask0         ; // WMASK#
+logic   [31:0]              cache_mem_din0           ; // Write Data
+logic   [31:0]              cache_mem_dout0          ; // Read Data
+        
+// SRAM-0 PORT-1, IMEM I/F
+logic                       cache_mem_clk1           ; // CLK
+logic                       cache_mem_csb1           ; // CS#
+logic  [8:0]                cache_mem_addr1          ; // Address
+logic  [31:0]               cache_mem_dout1          ;// Read Data
+
+
+//---------------------------------------------------------------------------
+// Signal Transalation from SRAM to dffram i/f
+// cache_dffram_en - dffram enable is active high
+// 2KB SRAM spitted into 2DFFRAM with 1KB Each
+// -------------------------------------------------------------------------
+
+input  logic                       cache_dffram_en        ; // CLK
+input  logic    [8:0]              cache_dffram_addr      ; // Address
+
+
+assign cache_dffram_en     =  !(cache_mem_csb0 & cache_mem_csb1);
+assign cache_dffram_addr   =  (cache_mem_csb0 == 1'b0) ? cache_mem_addr0 : (cache_mem_csb1 == 1'b0) ? cache_mem_addr1 : 'h0;
+
+assign cache_dffram_clk0   =  mclk;
+assign cache_dffram_clk1   =  mclk;
+
+assign cache_dffram_cs0    =  (cache_dffram_en) && (cache_dffram_addr[8] == 0);
+assign cache_dffram_cs1    =  (cache_dffram_en) && (cache_dffram_addr[8] == 1);
+
+assign cache_dffram_addr0  =  cache_dffram_addr[7:0];
+assign cache_dffram_addr1  =  cache_dffram_addr[7:0];
+
+// CSB0 support both write and read action
+// CSB1 support only read action
+assign cache_dffram_wmask0 =  (cache_mem_csb0 == 1'b0 && cache_dffram_cs0) ? cache_mem_wmask0: 'h0;
+assign cache_dffram_wmask1 =  (cache_mem_csb0 == 1'b0 && cache_dffram_cs1) ? cache_mem_wmask0: 'h0;
+
+assign cache_dffram_din0   =  cache_mem_din0;
+assign cache_dffram_din1   =  cache_mem_din0;
+
+assign cache_mem_dout0    =   (cache_dffram_cs0) ? cache_dffram_dout0 : cache_dffram_dout1;
+assign cache_mem_dout1    =   (cache_dffram_cs0) ? cache_dffram_dout0 : cache_dffram_dout1;
+
+
 
 // State Variables
 reg [3:0] state;
@@ -595,7 +644,7 @@ begin
        end
 
        CACHE_RDATA_FETCH2: begin
-	  cache_mem_csb1   <= 1'b1;
+	  cache_mem_csb1   <= 1'b0;
           cpu_mem_rdata    <= ycr1_conv_wb2mem_rdata(cpu_width_l,cpu_addr_l[1:0], cache_mem_dout1);
 	  cpu_mem_resp     <= 2'b01;
 	  state            <= CACHE_RDATA_FETCH3;
@@ -603,6 +652,7 @@ begin
        // Do Additial prefetech for next location
        CACHE_RDATA_FETCH3: begin
           prefetch_data    <= cache_mem_dout1;
+	  cache_mem_csb1   <= 1'b1;
           prefetch_val     <= 1'b1;
 	  cpu_mem_resp     <= 2'b00;
 	  state            <= IDLE;
@@ -612,7 +662,7 @@ begin
        // cycle
        PREFETCH_WAIT: begin
 	  cpu_mem_resp     <= 2'b00;
-	  cache_mem_csb1   <= 1'b1;
+	  cache_mem_csb1   <= 1'b0;
 	  state            <= CACHE_RDATA_FETCH3;
       end
 
@@ -799,7 +849,7 @@ begin
 	            tag_wr            <= 1'b0;	     
                     cache_mem_csb0    <= 1'b0;
                     cache_mem_web0    <= 1'b1;
-                    cache_mem_wmask0  <= 4'b1111;
+                    cache_mem_wmask0  <= 4'b0000;
                     cache_mem_addr0   <= {tag_cur_loc,cache_mem_ptr};
 	            cache_mem_ptr     <= cache_mem_ptr+1;
 		    cache_busy        <= 1'b1;

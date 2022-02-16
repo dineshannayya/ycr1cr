@@ -34,7 +34,7 @@
      `include "core/pipeline/ycr1_tracelog.sv"
      `include "top/ycr1_dmem_router.sv"
      `include "top/ycr1_dp_memory.sv"
-     `include "top/ycr1_tcm.sv"
+     `include "top/ycr1_tcm_router.sv"
      `include "top/ycr1_timer.sv"
      `include "top/ycr1_dmem_wb.sv"
      `include "top/ycr1_imem_wb.sv"

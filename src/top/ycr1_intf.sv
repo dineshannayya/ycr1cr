@@ -64,21 +64,21 @@ module ycr1_intf (
 `endif // YCR1_DBG_EN
 
 `ifndef YCR1_TCM_MEM
-    // SRAM-0 PORT-0
-    output  logic                           sram0_clk0,
-    output  logic                           sram0_csb0,
-    output  logic                           sram0_web0,
-    output  logic   [8:0]                   sram0_addr0,
-    output  logic   [3:0]                   sram0_wmask0,
-    output  logic   [31:0]                  sram0_din0,
-    input   logic   [31:0]                  sram0_dout0,
+    // DFFRAM I/F
 
-    // SRAM-0 PORT-1
-    output  logic                           sram0_clk1,
-    output  logic                           sram0_csb1,
-    output  logic  [8:0]                    sram0_addr1,
-    input   logic  [31:0]                   sram0_dout1,
-
+   output  logic                             tcm_dffram_clk0    , // CLK
+   output  logic                             tcm_dffram_cs0     , // Chip Select
+   output  logic    [7:0]                    tcm_dffram_addr0   , // Address
+   output  logic    [3:0]                    tcm_dffram_wmask0  , // Write Mask
+   output  logic    [31:0]                   tcm_dffram_din0    , // Write Data
+   input   logic    [31:0]                   tcm_dffram_dout0   , // Read Data
+   
+   output  logic                             tcm_dffram_clk1    , // CLK
+   output  logic                             tcm_dffram_cs1     , // Chip Select
+   output  logic    [7:0]                    tcm_dffram_addr1   , // Address
+   output  logic    [3:0]                    tcm_dffram_wmask1  , // Write Mask
+   output  logic    [31:0]                   tcm_dffram_din1    , // Write Data
+   input   logic    [31:0]                   tcm_dffram_dout1   , // Read Data
 `endif
 
     input   logic                           wb_rst_n,       // Wish bone reset
@@ -118,20 +118,21 @@ module ycr1_intf (
    input logic                              wb_icache_lack_i,// last acknowlegement
    input logic                              wb_icache_err_i,  // error
 
-   // CACHE SRAM Memory I/F
-   output logic                             icache_mem_clk0, // CLK
-   output logic                             icache_mem_csb0, // CS#
-   output logic                             icache_mem_web0, // WE#
-   output logic   [8:0]                     icache_mem_addr0, // Address
-   output logic   [3:0]                     icache_mem_wmask0, // WMASK#
-   output logic   [31:0]                    icache_mem_din0, // Write Data
-   //input  logic   [31:0]                  icache_mem_dout0, // Read Data
+    // DFFRAM I/F
+
+   output  logic                             icache_dffram_clk0    , // CLK
+   output  logic                             icache_dffram_cs0     , // Chip Select
+   output  logic    [7:0]                    icache_dffram_addr0   , // Address
+   output  logic    [3:0]                    icache_dffram_wmask0  , // Write Mask
+   output  logic    [31:0]                   icache_dffram_din0    , // Write Data
+   input   logic    [31:0]                   icache_dffram_dout0   , // Read Data
    
-   // SRAM-0 PORT-1, IMEM I/F
-   output logic                             icache_mem_clk1, // CLK
-   output logic                             icache_mem_csb1, // CS#
-   output logic  [8:0]                      icache_mem_addr1, // Address
-   input  logic  [31:0]                     icache_mem_dout1, // Read Data
+   output  logic                             icache_dffram_clk1    , // CLK
+   output  logic                             icache_dffram_cs1     , // Chip Select
+   output  logic    [7:0]                    icache_dffram_addr1   , // Address
+   output  logic    [3:0]                    icache_dffram_wmask1  , // Write Mask
+   output  logic    [31:0]                   icache_dffram_din1    , // Write Data
+   input   logic    [31:0]                   icache_dffram_dout1   , // Read Data
    `endif
 
    `ifdef YCR1_DCACHE_EN
@@ -150,20 +151,21 @@ module ycr1_intf (
    input logic                              wb_dcache_lack_i,// last acknowlegement
    input logic                              wb_dcache_err_i,  // error
 
-   // CACHE SRAM Memory I/F
-   output logic                             dcache_mem_clk0           , // CLK
-   output logic                             dcache_mem_csb0           , // CS#
-   output logic                             dcache_mem_web0           , // WE#
-   output logic   [8:0]                     dcache_mem_addr0          , // Address
-   output logic   [3:0]                     dcache_mem_wmask0         , // WMASK#
-   output logic   [31:0]                    dcache_mem_din0           , // Write Data
-   input  logic   [31:0]                    dcache_mem_dout0          , // Read Data
+    // DFFRAM I/F
+
+   output  logic                             dcache_dffram_clk0    , // CLK
+   output  logic                             dcache_dffram_cs0     , // Chip Select
+   output  logic    [7:0]                    dcache_dffram_addr0   , // Address
+   output  logic    [3:0]                    dcache_dffram_wmask0  , // Write Mask
+   output  logic    [31:0]                   dcache_dffram_din0    , // Write Data
+   input   logic    [31:0]                   dcache_dffram_dout0   , // Read Data
    
-   // SRAM-0 PORT-1, IMEM I/F
-   output logic                             dcache_mem_clk1           , // CLK
-   output logic                             dcache_mem_csb1           , // CS#
-   output logic  [8:0]                      dcache_mem_addr1          , // Address
-   input  logic  [31:0]                     dcache_mem_dout1          , // Read Data
+   output  logic                             dcache_dffram_clk1    , // CLK
+   output  logic                             dcache_dffram_cs1     , // Chip Select
+   output  logic    [7:0]                    dcache_dffram_addr1   , // Address
+   output  logic    [3:0]                    dcache_dffram_wmask1  , // Write Mask
+   output  logic    [31:0]                   dcache_dffram_din1    , // Write Data
+   input   logic    [31:0]                   dcache_dffram_dout1   , // Read Data
 
    `endif
 
@@ -441,42 +443,27 @@ ycr1_reset_and2_cell i_tapc_rstn_and2_cell (
 //-------------------------------------------------------------------------------
 // TCM instance
 //-------------------------------------------------------------------------------
-ycr1_tcm #(
+ycr1_tcm_router #(
     .YCR1_TCM_SIZE  (`YCR1_DMEM_AWIDTH'(~YCR1_TCM_ADDR_MASK + 1'b1))
 ) i_tcm (
     .clk            (core_clk        ),
     .rst_n          (core_rst_n_local),
 
 `ifndef YCR1_TCM_MEM
-    // SRAM-0 PORT-0
-    .sram0_clk0      (sram0_clk0),
-    .sram0_csb0      (sram0_csb0),
-    .sram0_web0      (sram0_web0),
-    .sram0_addr0     (sram0_addr0),
-    .sram0_wmask0    (sram0_wmask0),
-    .sram0_din0      (sram0_din0),
-    .sram0_dout0     (sram0_dout0),
-    
-    // SRAM-0 PORT-1
-    .sram0_clk1      (sram0_clk1),
-    .sram0_csb1      (sram0_csb1),
-    .sram0_addr1     (sram0_addr1),
-    .sram0_dout1     (sram0_dout1),
-
-    // SRAM-1 PORT-0
-    .sram1_clk0      (sram1_clk0),
-    .sram1_csb0      (sram1_csb0),
-    .sram1_web0      (sram1_web0),
-    .sram1_addr0     (sram1_addr0),
-    .sram1_wmask0    (sram1_wmask0),
-    .sram1_din0      (sram1_din0),
-    .sram1_dout0     (sram1_dout0),
-    
-    // SRAM-1 PORT-1
-    .sram1_clk1      (sram1_clk1),
-    .sram1_csb1      (sram1_csb1),
-    .sram1_addr1     (sram1_addr1),
-    .sram1_dout1     (sram1_dout1),
+	// DFFRAM I/F
+        .tcm_dffram_clk0            (tcm_dffram_clk0    ), // CLK
+        .tcm_dffram_cs0             (tcm_dffram_cs0     ), // Chip Select
+        .tcm_dffram_addr0           (tcm_dffram_addr0   ), // Address
+        .tcm_dffram_wmask0          (tcm_dffram_wmask0  ), // Write Mask
+        .tcm_dffram_din0            (tcm_dffram_din0    ), // Write Data
+        .tcm_dffram_dout0           (tcm_dffram_dout0   ), // Read Data
+                                                    
+        .tcm_dffram_clk1            (tcm_dffram_clk1    ), // CLK
+        .tcm_dffram_cs1             (tcm_dffram_cs1     ), // Chip Select
+        .tcm_dffram_addr1           (tcm_dffram_addr1   ), // Address
+        .tcm_dffram_wmask1          (tcm_dffram_wmask1  ), // Write Mask
+        .tcm_dffram_din1            (tcm_dffram_din1    ), // Write Data
+        .tcm_dffram_dout1           (tcm_dffram_dout1   ), // Read Data
 
 `endif
 
@@ -844,19 +831,20 @@ icache_top  #(.MEM_BL(`YCR1_IMEM_BSIZE) )u_icache (
         .wb_app_lack_i                (wb_icache_cclk_lack_i ), // last acknowlegement
         .wb_app_err_i                 (wb_icache_cclk_err_i  ), // error
 
-        // CACHE SRAM Memory I/F
-        .cache_mem_clk0               (icache_mem_clk0        ), // CLK
-        .cache_mem_csb0               (icache_mem_csb0        ), // CS#
-        .cache_mem_web0               (icache_mem_web0        ), // WE#
-        .cache_mem_addr0              (icache_mem_addr0       ), // Address
-        .cache_mem_wmask0             (icache_mem_wmask0      ), // WMASK#
-        .cache_mem_din0               (icache_mem_din0        ), // Write Data
-        
-        // SRAM-0 PORT-1, IMEM I/F
-        .cache_mem_clk1               (icache_mem_clk1        ), // CLK
-        .cache_mem_csb1               (icache_mem_csb1        ), // CS#
-        .cache_mem_addr1              (icache_mem_addr1       ), // Address
-        .cache_mem_dout1              (icache_mem_dout1       ) // Read Data
+	// DFFRAM I/F
+        .cache_dffram_clk0            (icache_dffram_clk0    ), // CLK
+        .cache_dffram_cs0             (icache_dffram_cs0     ), // Chip Select
+        .cache_dffram_addr0           (icache_dffram_addr0   ), // Address
+        .cache_dffram_wmask0          (icache_dffram_wmask0  ), // Write Mask
+        .cache_dffram_din0            (icache_dffram_din0    ), // Write Data
+        .cache_dffram_dout0           (icache_dffram_dout0   ), // Read Data
+                                                    
+        .cache_dffram_clk1            (icache_dffram_clk1    ), // CLK
+        .cache_dffram_cs1             (icache_dffram_cs1     ), // Chip Select
+        .cache_dffram_addr1           (icache_dffram_addr1   ), // Address
+        .cache_dffram_wmask1          (icache_dffram_wmask1  ), // Write Mask
+        .cache_dffram_din1            (icache_dffram_din1    ), // Write Data
+        .cache_dffram_dout1           (icache_dffram_dout1   ) // Read Data
 
 
 );
@@ -975,20 +963,20 @@ dcache_top  u_dcache (
         .wb_app_lack_i                (wb_dcache_cclk_lack_i ), // last acknowlegement
         .wb_app_err_i                 (wb_dcache_cclk_err_i  ),  // error
 
-        // CACHE SRAM Memory I/F
-        .cache_mem_clk0               (dcache_mem_clk0       ), // CLK
-        .cache_mem_csb0               (dcache_mem_csb0       ), // CS#
-        .cache_mem_web0               (dcache_mem_web0       ), // WE#
-        .cache_mem_addr0              (dcache_mem_addr0      ), // Address
-        .cache_mem_wmask0             (dcache_mem_wmask0     ), // WMASK#
-        .cache_mem_din0               (dcache_mem_din0       ), // Write Data
-        .cache_mem_dout0              (dcache_mem_dout0      ), // Read Data
-        
-        // SRAM-0 PORT-1, IMEM I/F
-        .cache_mem_clk1               (dcache_mem_clk1       ), // CLK
-        .cache_mem_csb1               (dcache_mem_csb1       ), // CS#
-        .cache_mem_addr1              (dcache_mem_addr1      ), // Address
-        .cache_mem_dout1              (dcache_mem_dout1      )  // Read Data
+	// DFFRAM I/F
+        .cache_dffram_clk0            (dcache_dffram_clk0    ), // CLK
+        .cache_dffram_cs0             (dcache_dffram_cs0     ), // Chip Select
+        .cache_dffram_addr0           (dcache_dffram_addr0   ), // Address
+        .cache_dffram_wmask0          (dcache_dffram_wmask0  ), // Write Mask
+        .cache_dffram_din0            (dcache_dffram_din0    ), // Write Data
+        .cache_dffram_dout0           (dcache_dffram_dout0   ), // Read Data
+                                                    
+        .cache_dffram_clk1            (dcache_dffram_clk1    ), // CLK
+        .cache_dffram_cs1             (dcache_dffram_cs1     ), // Chip Select
+        .cache_dffram_addr1           (dcache_dffram_addr1   ), // Address
+        .cache_dffram_wmask1          (dcache_dffram_wmask1  ), // Write Mask
+        .cache_dffram_din1            (dcache_dffram_din1    ), // Write Data
+        .cache_dffram_dout1           (dcache_dffram_dout1   ) // Read Data
 
 );
 
