@@ -63,6 +63,8 @@
 ////     1.4:   Feb 16, 2022, Dinesh A                                    ////
 ////            As SRAM from Sky130A is not qualified, we have changed    ////
 ////            cache and tcm interface to DFFRAM                         ////
+////     1.5:   Feb 20, 2022, Dinesh A                                    ////
+////            Total Risc core parameter added                           ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
