@@ -20,51 +20,16 @@ set ::env(ROUTING_CORES) "6"
 set ::env(DESIGN_NAME) ycr1_core_top
 set ::env(DESIGN_IS_CORE) 0
 
-set ::env(RUN_KLAYOUT) 0
-
-set ::env(CLOCK_PERIOD) "25"
+set ::env(CLOCK_PERIOD) "10"
 set ::env(CLOCK_PORT) "clk"
 
-set ::env(RESET_PORT) "rst_n"
+set ::env(SYNTH_MAX_FANOUT) 4
 
-set ::env(BASE_SDC_FILE) $script_dir/base.sdc 
-
-## Synthesis
-set ::env(SYNTH_STRATEGY) "DELAY 1"
-set ::env(SYNTH_MAX_FANOUT) 8
-set ::env(SYNTH_READ_BLACKBOX_LIB) 1
-
-set ::env(STA_REPORT_POWER) 1
-
-## Floorplan
-set ::env(FP_PIN_ORDER_CFG) $script_dir/pin_order.cfg
-set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 400 1400 "
-
-#set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro_placement.cfg
-set ::env(PL_TARGET_DENSITY) 0.40
-set ::env(CELL_PAD) 0
-
-
-## PDN
-set ::env(FP_PDN_CORE_RING) 0
-
-## CTS
-set ::env(CTS_CLK_BUFFER_LIST) "sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_8 sky130_fd_sc_hd__clkbuf_16"
-
-## Placement
-set ::env(PL_RESIZER_DESIGN_OPTIMIZATIONS) 1
-set ::env(PL_RESIZER_TIMING_OPTIMIZATIONS) 1
-
-
-set ::env(GLB_RT_MINLAYER) 1
-set ::env(GLB_RT_MAXLAYER) 6
-
-	
-## Diode Insertion
-set ::env(DIODE_INSERTION_STRATEGY) 4
-
-
+## CTS BUFFER
+set ::env(CTS_CLK_BUFFER_LIST) "sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_8"
+set ::env(CTS_SINK_CLUSTERING_SIZE) "16"
+set ::env(CLOCK_BUFFER_FANOUT) "8"
+set ::env(LEC_ENABLE) 0
 
 set ::env(VERILOG_FILES) "\
 	$script_dir/../../src/core/pipeline/ycr1_pipe_top.sv           \
@@ -93,9 +58,33 @@ set ::env(VERILOG_FILES) "\
 set ::env(VERILOG_INCLUDE_DIRS) [glob $script_dir/../../src/includes ]
 
 
+set ::env(SDC_FILE) "$script_dir/base.sdc"
+set ::env(BASE_SDC_FILE) "$script_dir/base.sdc"
 
-########## DO NOT QUIT ON THE FOLLOWING
-set ::env(QUIT_ON_MAGIC_DRC) 1
-set ::env(QUIT_ON_TIMING_VIOLATIONS) 0
-set ::env(QUIT_ON_HOLD_VIOLATIONS) 0
-set ::env(QUIT_ON_SETUP_VIOLATIONS) 0
+set ::env(LEC_ENABLE) 0
+
+set ::env(VDD_PIN) [list {vccd1}]
+set ::env(GND_PIN) [list {vssd1}]
+
+## Floorplan
+set ::env(FP_PIN_ORDER_CFG) $script_dir/pin_order.cfg
+set ::env(FP_SIZING) absolute
+set ::env(DIE_AREA) "0 0 700 850 "
+
+set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro_placement.cfg
+set ::env(PL_TARGET_DENSITY) 0.36
+
+
+set ::env(GLB_RT_MAXLAYER) 5
+set ::env(GLB_RT_MAX_DIODE_INS_ITERS) 10
+set ::env(DIODE_INSERTION_STRATEGY) 4
+
+
+set ::env(QUIT_ON_TIMING_VIOLATIONS) "0"
+set ::env(QUIT_ON_MAGIC_DRC) "1"
+set ::env(QUIT_ON_LVS_ERROR) "0"
+set ::env(QUIT_ON_SLEW_VIOLATIONS) "0"
+
+#Need to cross-check why global timing opimization creating setup vio with hugh hold fix
+set ::env(GLB_RESIZER_TIMING_OPTIMIZATIONS) "0"
+
