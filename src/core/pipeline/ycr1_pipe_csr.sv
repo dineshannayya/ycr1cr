@@ -369,6 +369,7 @@ always_comb begin
         YCR1_CSR_ADDR_MARCHID   : csr_r_data    = YCR1_CSR_MARCHID;
         YCR1_CSR_ADDR_MIMPID    : csr_r_data    = YCR1_CSR_MIMPID;
         YCR1_CSR_ADDR_MHARTID   : csr_r_data    = soc2csr_fuse_mhartid_i;
+        YCR1_CSR_ADDR_NUMCORES  : csr_r_data    = YCR1_CSR_NUMCORES;
 
         // Machine Trap Setup (read-write)
         YCR1_CSR_ADDR_MSTATUS   : csr_r_data    = csr_mstatus;

@@ -174,6 +174,9 @@ parameter bit [`YCR1_XLEN-1:0] YCR1_CSR_MARCHID     = `YCR1_XLEN'd8;
 // MIMPID
 parameter bit [`YCR1_XLEN-1:0] YCR1_CSR_MIMPID      = `YCR1_MIMPID;
 
+// NUMCORES
+parameter bit [`YCR1_XLEN-1:0] YCR1_CSR_NUMCORES    = `YCR1_NUMCORES;
+
 // MSTATUS
 parameter bit [1:0] YCR1_CSR_MSTATUS_MPP            = 2'b11;
 parameter int unsigned YCR1_CSR_MSTATUS_MIE_OFFSET  = 3;

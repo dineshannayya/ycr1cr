@@ -848,7 +848,7 @@ begin
 	            app_mem_offset    <= tag_ctag;
 	            tag_wr            <= 1'b0;	     
                     cache_mem_csb0    <= 1'b0;
-                    cache_mem_web0    <= 1'b1;
+                    cache_mem_web0    <= 1'b0;
                     cache_mem_wmask0  <= 4'b0000;
                     cache_mem_addr0   <= {tag_cur_loc,cache_mem_ptr};
 	            cache_mem_ptr     <= cache_mem_ptr+1;

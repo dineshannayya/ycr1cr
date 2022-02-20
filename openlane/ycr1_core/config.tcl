@@ -39,10 +39,10 @@ set ::env(STA_REPORT_POWER) 1
 ## Floorplan
 set ::env(FP_PIN_ORDER_CFG) $script_dir/pin_order.cfg
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 380 1425 "
+set ::env(DIE_AREA) "0 0 400 1400 "
 
 #set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro_placement.cfg
-set ::env(PL_TARGET_DENSITY) 0.37
+set ::env(PL_TARGET_DENSITY) 0.40
 set ::env(CELL_PAD) 0
 
 

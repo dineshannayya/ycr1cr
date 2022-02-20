@@ -749,6 +749,7 @@ always_comb begin
                         | (abs_cmd_regno == YCR1_CSR_ADDR_MARCHID)
                         | (abs_cmd_regno == YCR1_CSR_ADDR_MIMPID)
                         | (abs_cmd_regno == YCR1_CSR_ADDR_MHARTID)
+                        | (abs_cmd_regno == YCR1_CSR_ADDR_NUMCORES)
                         | (abs_cmd_regno == YCR1_HDU_DBGCSR_ADDR_DPC);
 
     abs_cmd_type        = abs_cmd[YCR1_DBG_COMMAND_TYPE_HI:YCR1_DBG_COMMAND_TYPE_LO];
@@ -1246,6 +1247,7 @@ always_comb begin
                 YCR1_CSR_ADDR_MARCHID  : abs_data0_next = YCR1_CSR_MARCHID;
                 YCR1_CSR_ADDR_MIMPID   : abs_data0_next = YCR1_CSR_MIMPID;
                 YCR1_CSR_ADDR_MHARTID  : abs_data0_next = soc2dm_fuse_mhartid_i;
+                YCR1_CSR_ADDR_NUMCORES : abs_data0_next = YCR1_CSR_NUMCORES;
                 default                : abs_data0_next = pipe2dm_pc_sample_i;
             endcase
         end

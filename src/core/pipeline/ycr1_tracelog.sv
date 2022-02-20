@@ -304,6 +304,7 @@ initial begin
     trace_fhandler_core = $fopen({"tracelog_core_", hart, ".log"}, "w");
 
     // Writing initial header
+    $fwrite(trace_fhandler_core,  "# Total Core %h\n", YCR1_CSR_NUMCORES);
     $fwrite(trace_fhandler_core,  "# RTL_ID %h\n", YCR1_CSR_MIMPID);
     $fwrite(trace_fhandler_core,  "#\n");
     // $fwrite(trace_fhandler_core,  "# R - return from trap:\n");

@@ -39,21 +39,32 @@ set ::env(STA_REPORT_POWER) 0
 ## Floorplan
 set ::env(FP_PIN_ORDER_CFG) $script_dir/pin_order.cfg
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 380 1425 "
+set ::env(DIE_AREA) "0 0 380 1450 "
 
 set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro_placement.cfg
-set ::env(PL_TARGET_DENSITY) 0.37
+set ::env(PL_TARGET_DENSITY) 0.38
 set ::env(CELL_PAD) 0
 
 
 ## PDN
 set ::env(FP_PDN_CORE_RING) 0
 
+## CTS
+set ::env(CTS_CLK_BUFFER_LIST) "sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_8 sky130_fd_sc_hd__clkbuf_16"
+set ::env(CTS_SINK_CLUSTERING_SIZE) "16"
+set ::env(CLOCK_BUFFER_FANOUT) "8"
 
+## Placement
+set ::env(PL_RESIZER_DESIGN_OPTIMIZATIONS) 1
+set ::env(PL_RESIZER_TIMING_OPTIMIZATIONS) 1
+
+
+set ::env(GLB_RT_MAXLAYER) 5
+
+	
 ## Diode Insertion
 set ::env(DIODE_INSERTION_STRATEGY) 4
 
-set ::env(GLB_RT_MAXLAYER) 5
 
 
 set ::env(VERILOG_FILES) "\
@@ -62,7 +73,7 @@ set ::env(VERILOG_FILES) "\
 	$script_dir/../../src/top/ycr1_imem_router.sv                  \
 	$script_dir/../../src/top/ycr1_icache_router.sv                \
 	$script_dir/../../src/top/ycr1_dcache_router.sv                \
-	$script_dir/../../src/top/ycr1_tcm.sv                          \
+	$script_dir/../../src/top/ycr1_tcm_router.sv                          \
 	$script_dir/../../src/top/ycr1_timer.sv                        \
 	$script_dir/../../src/top/ycr1_top_wb.sv                       \
 	$script_dir/../../src/top/ycr1_dmem_wb.sv                      \
@@ -84,8 +95,7 @@ set ::env(VERILOG_INCLUDE_DIRS) [glob $script_dir/../../src/includes ]
 
 
 ########## DO NOT QUIT ON THE FOLLOWING
-set ::env(MAGIC_DRC_USE_GDS) 0
-set ::env(QUIT_ON_MAGIC_DRC) 0
+set ::env(QUIT_ON_MAGIC_DRC) 1
 set ::env(QUIT_ON_TIMING_VIOLATIONS) 0
 set ::env(QUIT_ON_HOLD_VIOLATIONS) 0
 set ::env(QUIT_ON_SETUP_VIOLATIONS) 0
