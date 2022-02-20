@@ -91,9 +91,10 @@ module ycr1_top_wb (
     input   logic                                   pwrup_rst_n,            // Power-Up Reset
     input   logic                                   rst_n,                  // Regular Reset signal
     input   logic                                   cpu_rst_n,              // CPU Reset (Core Reset)
-    // input   logic                                   test_mode,              // Test mode - unused
-    // input   logic                                   test_rst_n,             // Test mode's reset - unused
+    // input   logic                                test_mode,              // Test mode - unused
+    // input   logic                                test_rst_n,             // Test mode's reset - unused
     input   logic                                   core_clk,               // Core clock
+    input   logic                                   core_clk_mclk,        // Core clock for memory - without CTS
     input   logic                                   rtc_clk,                // Real-time clock
     output  logic [63:0]                            riscv_debug,
 `ifdef YCR1_DBG_EN
@@ -326,6 +327,18 @@ logic                                               timer_irq;
 logic [63:0]                                        timer_val;
 logic [48:0]                                        core_debug;
 
+
+// As DFFRAM has hugh insertion delay, we have additional clock without CTS 
+// to manage the input hold violation
+ctech_clk_buf u_tcm_mem0_clk (.A(core_clk_mclk ) , .X(tcm_dffram_clk0 ));
+ctech_clk_buf u_tcm_mem1_clk (.A(core_clk_mclk ) , .X(tcm_dffram_clk1 ));
+
+ctech_clk_buf u_icache_mem0_clk (.A(core_clk_mclk ) , .X(icache_dffram_clk0 ));
+ctech_clk_buf u_icache_mem1_clk (.A(core_clk_mclk ) , .X(icache_dffram_clk1 ));
+
+ctech_clk_buf u_dcache_mem0_clk (.A(core_clk_mclk ) , .X(dcache_dffram_clk0 ));
+ctech_clk_buf u_dcache_mem1_clk (.A(core_clk_mclk ) , .X(dcache_dffram_clk1 ));
+
 // riscv clock skew control
 clk_skew_adjust u_skew_riscv
        (
@@ -356,14 +369,14 @@ ycr1_intf u_intf (
 
 `ifndef YCR1_TCM_MEM
 	// DFFRAM I/F
-        .tcm_dffram_clk0            (tcm_dffram_clk0    ), // CLK
+        .tcm_dffram_clk0            (                   ), // CLK
         .tcm_dffram_cs0             (tcm_dffram_cs0     ), // Chip Select
         .tcm_dffram_addr0           (tcm_dffram_addr0   ), // Address
         .tcm_dffram_wmask0          (tcm_dffram_wmask0  ), // Write Mask
         .tcm_dffram_din0            (tcm_dffram_din0    ), // Write Data
         .tcm_dffram_dout0           (tcm_dffram_dout0   ), // Read Data
                                                     
-        .tcm_dffram_clk1            (tcm_dffram_clk1    ), // CLK
+        .tcm_dffram_clk1            (                   ), // CLK
         .tcm_dffram_cs1             (tcm_dffram_cs1     ), // Chip Select
         .tcm_dffram_addr1           (tcm_dffram_addr1   ), // Address
         .tcm_dffram_wmask1          (tcm_dffram_wmask1  ), // Write Mask
@@ -411,14 +424,14 @@ ycr1_intf u_intf (
     .wb_icache_err_i                    (wb_icache_err_i  ),  // error
 
      // DFFRAM I/F
-    .icache_dffram_clk0                 (icache_dffram_clk0    ), // CLK
+    .icache_dffram_clk0                 (                      ), // CLK
     .icache_dffram_cs0                  (icache_dffram_cs0     ), // Chip Select
     .icache_dffram_addr0                (icache_dffram_addr0   ), // Address
     .icache_dffram_wmask0               (icache_dffram_wmask0  ), // Write Mask
     .icache_dffram_din0                 (icache_dffram_din0    ), // Write Data
     .icache_dffram_dout0                (icache_dffram_dout0   ), // Read Data
                                                          
-    .icache_dffram_clk1                 (icache_dffram_clk1    ), // CLK
+    .icache_dffram_clk1                 (                      ), // CLK
     .icache_dffram_cs1                  (icache_dffram_cs1     ), // Chip Select
     .icache_dffram_addr1                (icache_dffram_addr1   ), // Address
     .icache_dffram_wmask1               (icache_dffram_wmask1  ), // Write Mask
@@ -445,14 +458,14 @@ ycr1_intf u_intf (
     .wb_dcache_err_i                    (wb_dcache_err_i  ),  // error
 
      // DFFRAM I/F
-    .dcache_dffram_clk0                 (dcache_dffram_clk0    ), // CLK
+    .dcache_dffram_clk0                 (                      ), // CLK
     .dcache_dffram_cs0                  (dcache_dffram_cs0     ), // Chip Select
     .dcache_dffram_addr0                (dcache_dffram_addr0   ), // Address
     .dcache_dffram_wmask0               (dcache_dffram_wmask0  ), // Write Mask
     .dcache_dffram_din0                 (dcache_dffram_din0    ), // Write Data
     .dcache_dffram_dout0                (dcache_dffram_dout0   ), // Read Data
                                                          
-    .dcache_dffram_clk1                 (dcache_dffram_clk1    ), // CLK
+    .dcache_dffram_clk1                 (                      ), // CLK
     .dcache_dffram_cs1                  (dcache_dffram_cs1     ), // Chip Select
     .dcache_dffram_addr1                (dcache_dffram_addr1   ), // Address
     .dcache_dffram_wmask1               (dcache_dffram_wmask1  ), // Write Mask
