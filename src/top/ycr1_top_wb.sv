@@ -65,6 +65,8 @@
 ////            cache and tcm interface to DFFRAM                         ////
 ////     1.5:   Feb 20, 2022, Dinesh A                                    ////
 ////            Total Risc core parameter added                           ////
+////     1.6:   Mar 14, 2022, Dinesh A                                    ////
+////            fuse_mhartid is internally tied                           ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -107,8 +109,6 @@ module ycr1_top_wb (
     output  logic                                   sys_rdc_qlfy_o,         // System-to-External SOC Reset Domain Crossing Qualifier
 `endif // YCR1_DBG_EN
 
-    // Fuses
-    input   logic [`YCR1_XLEN-1:0]                  fuse_mhartid,           // Hart ID
 `ifdef YCR1_DBG_EN
     input   logic [31:0]                            fuse_idcode,            // TAPC IDCODE
 `endif // YCR1_DBG_EN
@@ -329,6 +329,8 @@ logic                                               timer_irq;
 logic [63:0]                                        timer_val;
 logic [48:0]                                        core_debug;
 
+
+wire [`YCR1_XLEN-1:0]    fuse_mhartid  = 'h0;
 
 // As DFFRAM has hugh insertion delay, we have additional clock without CTS 
 // to manage the input hold violation
