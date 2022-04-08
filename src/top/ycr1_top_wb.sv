@@ -101,6 +101,7 @@ module ycr1_top_wb (
     input   logic                                   core_clk_mclk,        // Core clock for memory - without CTS
     input   logic                                   rtc_clk,                // Real-time clock
     output  logic [63:0]                            riscv_debug,
+    input   logic [2:0]                             cfg_cache_ctrl,
 `ifdef YCR1_DBG_EN
     output  logic                                   sys_rst_n_o,            // External System Reset output
                                                                             //   (for the processor cluster's components or
@@ -365,6 +366,7 @@ ycr1_intf u_intf (
     .core_clk                           (core_clk),           // Core clock
     .rtc_clk                            (rtc_clk),            // Real-time clock
     .riscv_debug                        (riscv_debug),
+    .cfg_cache_ctrl                     (cfg_cache_ctrl),
 
 `ifdef YCR1_DBG_EN
     // -- JTAG I/F

@@ -57,6 +57,7 @@ module ycr1_intf (
     input   logic                           core_clk,               // Core clock
     input   logic                           rtc_clk,                // Real-time clock
     output  logic [63:0]                    riscv_debug,
+    input   logic [2:0]                     cfg_cache_ctrl,
 
 `ifdef YCR1_DBG_EN
     // -- JTAG I/F
@@ -385,11 +386,11 @@ assign riscv_debug = {core_imem_req_ack,core_imem_req,core_imem_cmd,core_imem_re
 		      wb_imem_req,wb_dmem_req,wb_imem_cmd,wb_imem_resp[1:0], core_debug };
 
 
-wire cfg_icache_pfet_dis      = riscv_glbl_cfg[0];
-wire cfg_icache_ntag_pfet_dis = riscv_glbl_cfg[1];
+wire cfg_icache_pfet_dis      = cfg_cache_ctrl[0];
+wire cfg_icache_ntag_pfet_dis = cfg_cache_ctrl[1];
 
-wire cfg_dcache_pfet_dis      = riscv_glbl_cfg[2];
-wire cfg_dcache_force_flush   = riscv_glbl_cfg[3];
+wire cfg_dcache_pfet_dis      = cfg_cache_ctrl[2];
+wire cfg_dcache_force_flush   = riscv_glbl_cfg[0];
 //-------------------------------------------------------------------------------
 // Reset logic
 //-------------------------------------------------------------------------------
