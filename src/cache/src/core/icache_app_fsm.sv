@@ -43,7 +43,7 @@
 ////
 //// ******************************************************************************************************
 
-`include "ycr1_cache_defs.svh"
+`include "ycr_cache_defs.svh"
 
 module icache_app_fsm  #(
 	 parameter WB_AW      = 32,

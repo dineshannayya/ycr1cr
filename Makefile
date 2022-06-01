@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Makefile for YCR1
+# Makefile for YCR
 #------------------------------------------------------------------------------
 
 SHELL = sh -xv
@@ -16,31 +16,31 @@ export CFG      ?= MAX
 export BUS      ?= WB
 
 ifeq ($(CFG), MAX)
-# Predefined configuration YCR1_CFG_RV32IMC_MAX
+# Predefined configuration YCR_CFG_RV32IMC_MAX
     override ARCH         := IMC
     override VECT_IRQ     := 1
     override IPIC         := 1
     override TCM          := 0
-    override SIM_CFG_DEF  := YCR1_CFG_RV32IMC_MAX
+    override SIM_CFG_DEF  := YCR_CFG_RV32IMC_MAX
 else
     ifeq ($(CFG), BASE)
-    # Predefined configuration YCR1_CFG_RV32IC_BASE
+    # Predefined configuration YCR_CFG_RV32IC_BASE
         override ARCH         := IC
         override VECT_IRQ     := 1
         override IPIC         := 1
         override TCM          := 1
-        override SIM_CFG_DEF  := YCR1_CFG_RV32IC_BASE
+        override SIM_CFG_DEF  := YCR_CFG_RV32IC_BASE
     else
         ifeq ($(CFG), MIN)
-        # Predefined configuration YCR1_CFG_RV32EC_MIN
+        # Predefined configuration YCR_CFG_RV32EC_MIN
             override ARCH         := EC
             override VECT_IRQ     := 0
             override IPIC         := 0
             override TCM          := 1
-            override SIM_CFG_DEF  := YCR1_CFG_RV32EC_MIN
+            override SIM_CFG_DEF  := YCR_CFG_RV32EC_MIN
         else
         # CUSTOM configuration. Parameters can be overwritten
-            # These options are for compiling tests only. Set the corresponding RTL parameters manually in the file ycr1_arch_description.svh.
+            # These options are for compiling tests only. Set the corresponding RTL parameters manually in the file ycr_arch_description.svh.
             # ARCH = <IMC, IC, IM, I, EMC, EM, EC, E>
             # VECT_IRQ = <0, 1>
             # IPIC = <0, 1>
@@ -49,7 +49,7 @@ else
             VECT_IRQ  ?= 0
             IPIC      ?= 0
             TCM       ?= 0
-            SIM_CFG_DEF  = YCR1_CFG_$(CFG)
+            SIM_CFG_DEF  = YCR_CFG_$(CFG)
         endif
     endif
 endif
@@ -88,9 +88,9 @@ override ARCH=$(ARCH_tmp)
 TRACE ?= 0
 
 ifeq ($(TRACE), 1)
-    export SIM_TRACE_DEF = YCR1_TRACE_LOG_EN
+    export SIM_TRACE_DEF = YCR_TRACE_LOG_EN
 else
-    export SIM_TRACE_DEF = YCR1_TRACE_LOG_DIS
+    export SIM_TRACE_DEF = YCR_TRACE_LOG_DIS
 endif
 
 
@@ -143,15 +143,15 @@ export RISCV_READELF ?= $(CROSS_PREFIX)readelf -s
 ifneq (,$(findstring axi,$(BUS_lowercase)))
 export rtl_top_files := axi_top.files
 export rtl_tb_files  := axi_tb.files
-export top_module    := ycr1_top_tb_axi
+export top_module    := ycr_top_tb_axi
 else ifneq (,$(findstring wb,$(BUS_lowercase)))
 export rtl_top_files := wb_top.files
 export rtl_tb_files  := wb_tb.files
-export top_module    := ycr1_top_tb_wb
+export top_module    := ycr_top_tb_wb
 else 
 export rtl_top_files := ahb_top.files
 export rtl_tb_files  := ahb_tb.files
-export top_module    := ycr1_top_tb_ahb
+export top_module    := ycr_top_tb_ahb
 endif
 
 #RISCV COMPLIANCE test Environment

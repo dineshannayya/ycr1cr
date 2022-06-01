@@ -17,7 +17,7 @@ set script_dir [file dirname [file normalize [info script]]]
 
 set ::env(ROUTING_CORES) "6"
 
-set ::env(DESIGN_NAME) ycr1_top_wb
+set ::env(DESIGN_NAME) ycr_top_wb
 set ::env(DESIGN_IS_CORE) 1
 
 set ::env(RUN_KLAYOUT) 0
@@ -112,45 +112,45 @@ set ::env(EXTRA_LIBS) "\
 
 set ::env(VERILOG_FILES) "\
         $script_dir/../../src/lib/clk_skew_adjust.gv                   \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_top.sv           \
-	$script_dir/../../src/core/ycr1_core_top.sv                    \
-	$script_dir/../../src/core/ycr1_dm.sv                          \
-	$script_dir/../../src/core/ycr1_tapc_synchronizer.sv           \
-	$script_dir/../../src/core/ycr1_clk_ctrl.sv                    \
-	$script_dir/../../src/core/ycr1_scu.sv                         \
-	$script_dir/../../src/core/ycr1_tapc.sv                        \
-	$script_dir/../../src/core/ycr1_tapc_shift_reg.sv              \
-	$script_dir/../../src/core/ycr1_dmi.sv                         \
-	$script_dir/../../src/core/primitives/ycr1_reset_cells.sv      \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_ifu.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_idu.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_exu.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_mprf.sv          \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_csr.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_ialu.sv          \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_mul.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_div.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_lsu.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_hdu.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_pipe_tdu.sv           \
-	$script_dir/../../src/core/pipeline/ycr1_ipic.sv               \
-	$script_dir/../../src/top/ycr1_dmem_router.sv                  \
-	$script_dir/../../src/top/ycr1_imem_router.sv                  \
-	$script_dir/../../src/top/ycr1_icache_router.sv                \
-	$script_dir/../../src/top/ycr1_dcache_router.sv                \
-	$script_dir/../../src/top/ycr1_tcm.sv                          \
-	$script_dir/../../src/top/ycr1_timer.sv                        \
-	$script_dir/../../src/top/ycr1_top_wb.sv                       \
-	$script_dir/../../src/top/ycr1_dmem_wb.sv                      \
-	$script_dir/../../src/top/ycr1_imem_wb.sv                      \
-	$script_dir/../../src/top/ycr1_intf.sv                         \
+	$script_dir/../../src/core/pipeline/ycr_pipe_top.sv           \
+	$script_dir/../../src/core/ycr_core_top.sv                    \
+	$script_dir/../../src/core/ycr_dm.sv                          \
+	$script_dir/../../src/core/ycr_tapc_synchronizer.sv           \
+	$script_dir/../../src/core/ycr_clk_ctrl.sv                    \
+	$script_dir/../../src/core/ycr_scu.sv                         \
+	$script_dir/../../src/core/ycr_tapc.sv                        \
+	$script_dir/../../src/core/ycr_tapc_shift_reg.sv              \
+	$script_dir/../../src/core/ycr_dmi.sv                         \
+	$script_dir/../../src/core/primitives/ycr_reset_cells.sv      \
+	$script_dir/../../src/core/pipeline/ycr_pipe_ifu.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_idu.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_exu.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_mprf.sv          \
+	$script_dir/../../src/core/pipeline/ycr_pipe_csr.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_ialu.sv          \
+	$script_dir/../../src/core/pipeline/ycr_pipe_mul.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_div.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_lsu.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_hdu.sv           \
+	$script_dir/../../src/core/pipeline/ycr_pipe_tdu.sv           \
+	$script_dir/../../src/core/pipeline/ycr_ipic.sv               \
+	$script_dir/../../src/top/ycr_dmem_router.sv                  \
+	$script_dir/../../src/top/ycr_imem_router.sv                  \
+	$script_dir/../../src/top/ycr_icache_router.sv                \
+	$script_dir/../../src/top/ycr_dcache_router.sv                \
+	$script_dir/../../src/top/ycr_tcm.sv                          \
+	$script_dir/../../src/top/ycr_timer.sv                        \
+	$script_dir/../../src/top/ycr_top_wb.sv                       \
+	$script_dir/../../src/top/ycr_dmem_wb.sv                      \
+	$script_dir/../../src/top/ycr_imem_wb.sv                      \
+	$script_dir/../../src/top/ycr_intf.sv                         \
         $script_dir/../../src/cache/src/core/icache_top.sv             \
         $script_dir/../../src/cache/src/core/icache_app_fsm.sv         \
         $script_dir/../../src/cache/src/core/icache_tag_fifo.sv        \
         $script_dir/../../src/cache/src/core/dcache_tag_fifo.sv        \
         $script_dir/../../src/cache/src/core/dcache_top.sv             \
-        $script_dir/../../src/lib/ycr1_async_wbb.sv                    \
-        $script_dir/../../src/lib/ycr1_arb.sv                          \
+        $script_dir/../../src/lib/ycr_async_wbb.sv                    \
+        $script_dir/../../src/lib/ycr_arb.sv                          \
         $script_dir/../../src/lib/sync_fifo.sv                         \
         $script_dir/../../src/lib/async_fifo.sv                        \
         $script_dir/../../src/lib/ctech_cells.sv                       \

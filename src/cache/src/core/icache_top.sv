@@ -119,7 +119,7 @@
 ////
 //// ******************************************************************************************************
 
-`include "ycr1_cache_defs.svh"
+`include "ycr_cache_defs.svh"
 
 module icache_top #(
 	 parameter WB_AW      = 32,
@@ -297,7 +297,7 @@ reg [3:0] state;
 // Function
 
 //Generate cpu read data based on width and address[1:0]
-function automatic logic[WB_DW-1:0] ycr1_conv_wb2mem_rdata (
+function automatic logic[WB_DW-1:0] ycr_conv_wb2mem_rdata (
     input   logic [1:0]                 hwidth,
     input   logic [1:0]                 haddr,
     input   logic [WB_DW-1:0]  hrdata
@@ -330,7 +330,7 @@ begin
         default : begin
         end
     endcase
-    ycr1_conv_wb2mem_rdata = tmp;
+    ycr_conv_wb2mem_rdata = tmp;
 end
 endfunction
 
@@ -393,7 +393,7 @@ begin
 	 if(!cfg_pfet_dis && cpu_mem_req && prefetch_val && 
 	     (cpu_mem_addr[31:2] == {cpu_addr_l[31:7], prefetch_ptr[4:0]})) begin
 	     // Ack with Prefect data
-              cpu_mem_rdata    <= ycr1_conv_wb2mem_rdata(cpu_mem_width,cpu_mem_addr[1:0], prefetch_data);
+              cpu_mem_rdata    <= ycr_conv_wb2mem_rdata(cpu_mem_width,cpu_mem_addr[1:0], prefetch_data);
 	      if(cpu_mem_bl == 'h1)
 	          cpu_mem_resp     <= 2'b11; // Last Access
 	      else
@@ -477,7 +477,7 @@ begin
        end
 
        CACHE_RDATA_FETCH2: begin
-          cpu_mem_rdata     <= ycr1_conv_wb2mem_rdata(cpu_width_l,cpu_addr_l[1:0], cache_mem_dout1); 
+          cpu_mem_rdata     <= ycr_conv_wb2mem_rdata(cpu_width_l,cpu_addr_l[1:0], cache_mem_dout1); 
 	  if(cpu_bl_l == 'h1) begin // Check if it's last access of burst
 	      cache_mem_csb1   <= 1'b0;
 	      cpu_mem_resp     <= 2'b11; // Last Ack

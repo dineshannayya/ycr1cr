@@ -61,7 +61,7 @@ later version.
 
 // CPU pipeline monitors
 
-`include "ycr1_cache_defs.svh"
+`include "ycr_cache_defs.svh"
 
 module dcache_tag_fifo #(parameter WD=8, parameter DP=4) ( 
 	input logic                       clk,

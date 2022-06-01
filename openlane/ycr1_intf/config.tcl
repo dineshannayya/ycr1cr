@@ -17,7 +17,7 @@ set script_dir [file dirname [file normalize [info script]]]
 
 set ::env(ROUTING_CORES) "6"
 
-set ::env(DESIGN_NAME) ycr1_intf
+set ::env(DESIGN_NAME) ycr_intf
 set ::env(DESIGN_IS_CORE) "0"
 set ::env(FP_PDN_CORE_RING) "0"
 
@@ -35,27 +35,27 @@ set ::env(LEC_ENABLE) 0
 
 set ::env(VERILOG_FILES) "\
         $script_dir/../../src/lib/clk_skew_adjust.gv                   \
-	$script_dir/../../src/top/ycr1_dmem_router.sv                  \
-	$script_dir/../../src/top/ycr1_imem_router.sv                  \
-	$script_dir/../../src/top/ycr1_icache_router.sv                \
-	$script_dir/../../src/top/ycr1_dcache_router.sv                \
-	$script_dir/../../src/top/ycr1_tcm_router.sv                          \
-	$script_dir/../../src/top/ycr1_timer.sv                        \
-	$script_dir/../../src/top/ycr1_top_wb.sv                       \
-	$script_dir/../../src/top/ycr1_dmem_wb.sv                      \
-	$script_dir/../../src/top/ycr1_imem_wb.sv                      \
-	$script_dir/../../src/top/ycr1_intf.sv                         \
+	$script_dir/../../src/top/ycr_dmem_router.sv                  \
+	$script_dir/../../src/top/ycr_imem_router.sv                  \
+	$script_dir/../../src/top/ycr_icache_router.sv                \
+	$script_dir/../../src/top/ycr_dcache_router.sv                \
+	$script_dir/../../src/top/ycr_tcm_router.sv                          \
+	$script_dir/../../src/top/ycr_timer.sv                        \
+	$script_dir/../../src/top/ycr_top_wb.sv                       \
+	$script_dir/../../src/top/ycr_dmem_wb.sv                      \
+	$script_dir/../../src/top/ycr_imem_wb.sv                      \
+	$script_dir/../../src/top/ycr_intf.sv                         \
         $script_dir/../../src/cache/src/core/icache_top.sv             \
         $script_dir/../../src/cache/src/core/icache_app_fsm.sv         \
         $script_dir/../../src/cache/src/core/icache_tag_fifo.sv        \
         $script_dir/../../src/cache/src/core/dcache_tag_fifo.sv        \
         $script_dir/../../src/cache/src/core/dcache_top.sv             \
-        $script_dir/../../src/lib/ycr1_async_wbb.sv                    \
-        $script_dir/../../src/lib/ycr1_arb.sv                          \
+        $script_dir/../../src/lib/ycr_async_wbb.sv                    \
+        $script_dir/../../src/lib/ycr_arb.sv                          \
         $script_dir/../../src/lib/sync_fifo.sv                         \
         $script_dir/../../src/lib/async_fifo.sv                        \
         $script_dir/../../src/lib/ctech_cells.sv                       \
-	$script_dir/../../src/core/primitives/ycr1_reset_cells.sv      \
+	$script_dir/../../src/core/primitives/ycr_reset_cells.sv      \
 	"
 set ::env(VERILOG_INCLUDE_DIRS) [glob $script_dir/../../src/includes ]
 
