@@ -386,7 +386,8 @@ ycr_top_wb i_top (
     .riscv_debug            (                       ),
 
     // Fuses
-    .fuse_mhartid           (fuse_mhartid           ),
+    //.fuse_mhartid           (fuse_mhartid           ),
+     .cfg_cache_ctrl        (3'b0),
 `ifdef YCR_DBG_EN
     .fuse_idcode            (`YCR_TAP_IDCODE       ),
 `endif // YCR_DBG_EN

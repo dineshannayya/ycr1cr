@@ -65,6 +65,8 @@
 ////            cache and tcm interface to DFFRAM                         ////
 ////     1.5:   Feb 20, 2022, Dinesh A                                    ////
 ////            Total Risc core parameter added                           ////
+////     1.6:   Mar 14, 2022, Dinesh A                                    ////
+////            fuse_mhartid is internally tied                           ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -99,6 +101,7 @@ module ycr_top_wb (
     input   logic                                   core_clk_mclk,        // Core clock for memory - without CTS
     input   logic                                   rtc_clk,                // Real-time clock
     output  logic [63:0]                            riscv_debug,
+    input   logic [2:0]                             cfg_cache_ctrl,
 `ifdef YCR_DBG_EN
     output  logic                                   sys_rst_n_o,            // External System Reset output
                                                                             //   (for the processor cluster's components or
@@ -108,7 +111,7 @@ module ycr_top_wb (
 `endif // YCR_DBG_EN
 
     // Fuses
-    input   logic [`YCR_XLEN-1:0]                  fuse_mhartid,           // Hart ID
+    //input   logic [`YCR_XLEN-1:0]                  fuse_mhartid,           // Hart ID
 `ifdef YCR_DBG_EN
     input   logic [31:0]                            fuse_idcode,            // TAPC IDCODE
 `endif // YCR_DBG_EN
@@ -330,6 +333,8 @@ logic [63:0]                                        timer_val;
 logic [48:0]                                        core_debug;
 
 
+wire [`YCR1_XLEN-1:0]    fuse_mhartid  = 'h0;
+
 // As DFFRAM has hugh insertion delay, we have additional clock without CTS 
 // to manage the input hold violation
 ctech_clk_buf u_tcm_mem0_clk (.A(core_clk_mclk ) , .X(tcm_dffram_clk0 ));
@@ -363,6 +368,7 @@ ycr_intf u_intf (
     .core_clk                           (core_clk),           // Core clock
     .rtc_clk                            (rtc_clk),            // Real-time clock
     .riscv_debug                        (riscv_debug),
+    .cfg_cache_ctrl                     (cfg_cache_ctrl),
 
 `ifdef YCR_DBG_EN
     // -- JTAG I/F

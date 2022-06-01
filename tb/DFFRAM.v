@@ -15,7 +15,7 @@
 
 `default_nettype none
 
-`define MEM_WORDS 256
+
 
 
 module DFFRAM (
@@ -31,8 +31,9 @@ module DFFRAM (
     input [7:0] A
 );
   
+parameter MEM_WORDS= 256;
 
-reg [31:0] mem [0:`MEM_WORDS-1];
+reg [31:0] mem [0:MEM_WORDS-1];
 
 always @(posedge CLK) begin
     if (EN == 1'b1) begin
