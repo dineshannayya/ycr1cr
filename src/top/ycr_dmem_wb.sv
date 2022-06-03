@@ -219,6 +219,7 @@ logic                                       req_fifo_rd;
 logic                                       req_fifo_wr;
 logic                                       req_fifo_empty;
 logic                                       req_fifo_full;
+logic                                       req_fifo_afull;
 
 
 logic                                       resp_fifo_rd;
@@ -258,8 +259,16 @@ type_ycr_req_fifo_s    req_fifo_din;
 type_ycr_req_fifo_s    req_fifo_dout;
 
 
-assign dmem_req_ack        = ~req_fifo_full;
-assign req_fifo_wr         = ~req_fifo_full & dmem_req;
+// Back-Back write is not supported
+always_ff @(negedge core_rst_n, posedge core_clk) begin
+    if (~core_rst_n) begin
+      dmem_req_ack  <= '0;
+    end else begin
+      dmem_req_ack  <= dmem_req & !req_fifo_full & !dmem_req_ack;
+    end
+end
+
+assign req_fifo_wr         = dmem_req_ack;
 
 //pack data in
 assign req_fifo_din.hbel   =  hbel_in;
@@ -281,7 +290,7 @@ assign req_fifo_din.hwdata =  hwdata_in;
         .wr_en       (req_fifo_wr    ),
         .wr_data     (req_fifo_din   ),
         .full        (req_fifo_full  ),
-        .afull       (               ),                 
+        .afull       (req_fifo_afull ),
 
     // RD Clock
         .rd_clk     (wb_clk          ),

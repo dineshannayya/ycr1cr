@@ -47,8 +47,8 @@
 // CORE FUNDAMENTAL PARAMETERS
 //------------------------------------------------------------------------------
 
-// YCR core identifiers
-`define YCR_MIMPID             32'h21051400
+// YCR1 core identifiers
+`define YCR_MIMPID             32'h22060300 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
 `define YCR_MVENDORID          32'h00000000
 `define YCR_NUMCORES           32'h00000001
 
@@ -80,9 +80,9 @@
 
 // Possible targets:
 // `define YCR_TRGT_FPGA_INTEL         // target platform is Intel FPGAs
-// `define YCR_TRGT_FPGA_INTEL_MAX10   // target platform is Intel MAX 10 FPGAs (used in the YCR-SDK project)
-// `define YCR_TRGT_FPGA_INTEL_ARRIAV  // target platform is Intel Arria V FPGAs (used in the YCR-SDK project)
-// `define YCR_TRGT_FPGA_XILINX        // target platform is Xilinx FPGAs (used in the YCR-SDK project)
+// `define YCR_TRGT_FPGA_INTEL_MAX10   // target platform is Intel MAX 10 FPGAs (used in the YCR1-SDK project)
+// `define YCR_TRGT_FPGA_INTEL_ARRIAV  // target platform is Intel Arria V FPGAs (used in the YCR1-SDK project)
+// `define YCR_TRGT_FPGA_XILINX        // target platform is Xilinx FPGAs (used in the YCR1-SDK project)
 // `define YCR_TRGT_ASIC               // target platform is ASIC
 // `define YCR_TRGT_SIMULATION         // target is simulation (enable simulation code)
 

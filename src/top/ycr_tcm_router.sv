@@ -96,6 +96,7 @@ logic [1:0]  tcm_resp;
 
 logic [31:0] dmem_writedata;
 logic [3:0]  dmem_byteen;
+logic [1:0]  dmem_rdata_shift_reg;
 
 
 wire tcm_ack = (tcm_resp == YCR_MEM_RESP_RDY_LOK);
@@ -103,7 +104,7 @@ wire tcm_ack = (tcm_resp == YCR_MEM_RESP_RDY_LOK);
 // Arbitor to select between external wb vs uart wb
 wire [1:0] grnt;
 
-ycr_arb u_arb(
+ycr_arb2 u_arb(
 	.clk      (clk                ), 
 	.rstn     (rst_n              ), 
 	.req      ({dmem_req,imem_req}), 
@@ -137,7 +138,6 @@ assign imem_resp       = (grnt == 2'b00) ? ((tcm_resp == YCR_MEM_RESP_RDY_LOK) ?
 // -----------------------------------
 
 assign dmem_req_ack         = (grnt == 2'b01) ? tcm_req_ack : 'h0;
-assign dmem_rdata_shift_reg = dmem_addr[1:0];
 assign dmem_rdata           = tcm_rdata >> ( 8 * dmem_rdata_shift_reg );
 assign dmem_resp            = (grnt == 2'b01) ? ((tcm_resp == YCR_MEM_RESP_RDY_LOK) ?  YCR_MEM_RESP_RDY_OK : tcm_resp)    : 'h0;
 
@@ -172,6 +172,7 @@ logic       mem_cs;
 logic [1:0] state;
 logic [3:0] mem_wmask;
 logic [31:0]mem_rdata;
+logic [31:0]mem_wdata;
 
 parameter IDLE          = 2'b00;
 parameter READ_ACTION1  = 2'b01;
@@ -185,9 +186,11 @@ always @(negedge rst_n, posedge clk) begin
     if (~rst_n) begin
        mem_addr         <= 'h0;
        mem_cs           <= 'b0;
+       mem_wdata        <= 'h0;
        mem_wmask        <= 'h0;
        tcm_resp         <= 'h0;
        tcm_rdata        <= 'h0;
+       dmem_rdata_shift_reg <= 'h0;
        state            <= IDLE;
     end else begin
 	case(state)
@@ -197,10 +200,12 @@ always @(negedge rst_n, posedge clk) begin
 	          mem_cs      <=  'b1;
                   mem_wmask   <=  'h0;
 	          tcm_resp    <=  'b0;
+                  dmem_rdata_shift_reg <= dmem_addr[1:0]; // unaligned access only happen in dmem interface
 	          state       <=  READ_ACTION1;
 	       end else if(tcm_req && tcm_cmd && !mem_ack) begin
 	          mem_cs      <=  'b1;
                   mem_wmask   <=  tcm_wmask;
+                  mem_wdata   <=  tcm_wdata;
 		  tcm_resp    <=  YCR_MEM_RESP_RDY_OK;
 	       end else begin
 	          mem_cs      <=  1'b0;
@@ -232,13 +237,13 @@ assign tcm_dffram_clk0        = clk; // CLK
 assign tcm_dffram_cs0         = ((mem_addr[8] == 1'b0) & mem_cs);  // Chip Select
 assign tcm_dffram_addr0       = mem_addr[7:0]; // Address
 assign tcm_dffram_wmask0      = mem_wmask; // Write Mask
-assign tcm_dffram_din0        = tcm_wdata;  // Write Data
+assign tcm_dffram_din0        = mem_wdata;  // Write Data
     
 assign tcm_dffram_clk1        = clk; // CLK
 assign tcm_dffram_cs1         = ((mem_addr[8] == 1'b1) & mem_cs); // Chip Select
 assign tcm_dffram_addr1       = mem_addr[7:0];                    // Address
 assign tcm_dffram_wmask1      = mem_wmask; // Write Mask
-assign tcm_dffram_din1        = tcm_wdata; // Write Data
+assign tcm_dffram_din1        = mem_wdata; // Write Data
 
 assign  mem_rdata = (mem_addr[8] == 1'b0) ? tcm_dffram_dout0 : tcm_dffram_dout1;
 

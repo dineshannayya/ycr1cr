@@ -1,6 +1,6 @@
 top/ycr_dmem_router.sv
 top/ycr_dp_memory.sv
-top/ycr_tcm.sv
+top/ycr_tcm_router.sv
 top/ycr_timer.sv
 top/ycr_dmem_wb.sv
 top/ycr_imem_wb.sv

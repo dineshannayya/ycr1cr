@@ -35,7 +35,7 @@ end
  logic [`YCR_DMEM_AWIDTH-1:0]           core2dmem_addr_o_r;           // DMEM address
  logic                                   core2dmem_cmd_o_r;
  
- `define RISC_CORE  i_top.i_core_top
+ `define RISC_CORE  i_top.i_core_top_0
  
  always@(posedge `RISC_CORE.clk) begin
      if(`RISC_CORE.imem2core_req_ack_i && `RISC_CORE.core2imem_req_o)
@@ -55,61 +55,74 @@ end
  end
 **/
 
-  logic [31:0] test_count;
- `define RISC_CORE  i_top.i_core_top
- `define RISC_EXU  i_top.i_core_top.i_pipe_top.i_pipe_exu
+  logic [31:0] pc_count;
+  logic [31:0] instr_count;
+ `define RISC_CORE  i_top.i_core_top_0
+ `define RISC_EXU  i_top.i_core_top_0.i_pipe_top.i_pipe_exu
+ `define RISC_IFU  i_top.i_core_top_0.i_pipe_top.i_pipe_ifu
 
  initial begin
-	 test_count = 0;
+	 pc_count    = 0;
+	 instr_count = 0;
  end
 
+ /**
+ always@(posedge `RISC_CORE.clk) begin
+	 if(rst_init) begin
+	     pc_count = 0;
+	 end else if(`RISC_EXU.pc_curr_upd) begin
+             $display("RISCV-DEBUG => Cnt: %x PC: %x", pc_count,`RISC_EXU.pc_curr_ff);
+             pc_count = pc_count+1;
+	  end
+ end
+ ***/
  
  always@(posedge `RISC_CORE.clk) begin
 	 if(rst_init) begin
-	     test_count = 0;
-	 end else if(`RISC_EXU.pc_curr_upd) begin
-             $display("RISCV-DEBUG => Cnt: %x PC: %x", test_count,`RISC_EXU.pc_curr_ff);
-             test_count <= test_count+1;
+	     instr_count = 0;
+	 end else if(`RISC_IFU.ifu2idu_vd_o & `RISC_IFU.idu2ifu_rdy_i) begin
+             $display("RISCV-DEBUG => Cnt: %x Instr: %x", instr_count,`RISC_IFU.ifu2idu_instr_o);
+             instr_count = instr_count+1;
 	  end
  end
 
 `ifdef GL
-//  wire [31:0] func_return_val = {i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][31],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][30],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][29],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][28],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][27],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][26],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][25],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][24],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][23],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][22],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][21],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][20],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][19],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][18],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][17],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][16],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][15],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][14],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][13],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][12],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][11],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][10],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][9],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][8],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][7],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][6],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][5],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][4],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][3],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][2],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][1],
-//	                         i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10][0]};
+//  wire [31:0] func_return_val = {i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][31],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][30],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][29],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][28],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][27],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][26],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][25],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][24],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][23],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][22],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][21],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][20],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][19],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][18],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][17],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][16],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][15],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][14],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][13],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][12],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][11],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][10],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][9],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][8],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][7],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][6],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][5],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][4],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][3],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][2],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][1],
+//	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][0]};
 //
-  wire [31:0] func_return_val = i_top.i_core_top.i_pipe_top.i_pipe_mprf.func_return_val; //
+  wire [31:0] func_return_val = i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.func_return_val; //
 `else
-  wire [31:0] func_return_val = i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10];
+  wire [31:0] func_return_val = i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10];
 `endif
 
 always @(posedge clk) begin
@@ -119,11 +132,11 @@ always @(posedge clk) begin
     if (test_running) begin
         test_pass = 1;
         rst_init <= 1'b0;
-	if(i_top.i_core_top.i_pipe_top.i_pipe_exu.pc_curr_ff === 32'hxxxx_xxxx) begin
+	if(i_top.i_core_top_0.i_pipe_top.i_pipe_exu.pc_curr_ff === 32'hxxxx_xxxx) begin
 	   $display("ERROR: CURRENT PC Counter State is Known");
 	   $finish;
 	end
-        if ((i_top.i_core_top.i_pipe_top.i_pipe_exu.exu2pipe_pc_curr_o == YCR_SIM_EXIT_ADDR) & ~rst_init & &rst_cnt) begin
+        if ((i_top.i_core_top_0.i_pipe_top.i_pipe_exu.exu2pipe_pc_curr_o == YCR_SIM_EXIT_ADDR) & ~rst_init & &rst_cnt) begin
 
             `ifdef VERILATOR
                 logic [255:0] full_filename;
@@ -241,7 +254,7 @@ always @(posedge clk) begin
                 `endif  // SIGNATURE_OUT
             end else begin // Non compliance mode
                 test_running <= 1'b0;
-		//if(i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10] != 0)
+		//if(i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10] != 0)
 		if(func_return_val != 0)
 		   $display("ERROR: mprf_int[10]: %x not zero",func_return_val);
                 test_pass = (func_return_val == 0);
@@ -275,7 +288,7 @@ always @(posedge clk) begin
             if (f_test != 0) begin
             // Launch new test
                 `ifdef YCR_TRACE_LOG_EN
-                    i_top.i_core_top.i_pipe_top.i_tracelog.test_name = test_file;
+                    i_top.i_core_top_0.i_pipe_top.i_tracelog.test_name = test_file;
                 `endif // YCR_TRACE_LOG_EN
                 //i_imem_tb.test_file = test_file;
                 //i_imem_tb.test_file_init = 1'b1;

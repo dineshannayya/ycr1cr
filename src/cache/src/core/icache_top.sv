@@ -159,25 +159,29 @@ module icache_top #(
         input logic                        wb_app_lack_i,// last acknowlegement
         input logic                        wb_app_err_i, // error
 
-	// DFFRAM I/F
-
-        output  logic                       cache_dffram_clk0        , // CLK
-        output  logic                       cache_dffram_cs0         , // Chip Select
-        output  logic    [7:0]              cache_dffram_addr0       , // Address
-        output  logic    [3:0]              cache_dffram_wmask0      , // Write Mask
-        output  logic    [31:0]             cache_dffram_din0        , // Write Data
-        input   logic    [31:0]             cache_dffram_dout0       , // Read Data
+        // CACHE SRAM Memory I/F
+        output logic                       cache_mem_clk0           , // CLK
+        output logic                       cache_mem_csb0           , // CS#
+        output logic                       cache_mem_web0           , // WE#
+        output logic   [8:0]               cache_mem_addr0          , // Address
+        output logic   [3:0]               cache_mem_wmask0         , // WMASK#
+        output logic   [31:0]              cache_mem_din0           , // Write Data
+        //input  logic   [31:0]            cache_mem_dout0          , // Read Data
         
-        output  logic                       cache_dffram_clk1        , // CLK
-        output  logic                       cache_dffram_cs1         , // Chip Select
-        output  logic    [7:0]              cache_dffram_addr1       , // Address
-        output  logic    [3:0]              cache_dffram_wmask1      , // Write Mask
-        output  logic    [31:0]             cache_dffram_din1        , // Write Data
-        input   logic    [31:0]             cache_dffram_dout1        // Read Data
+        // SRAM-0 PORT-1, IMEM I/F
+        output logic                       cache_mem_clk1           , // CLK
+        output logic                       cache_mem_csb1           , // CS#
+        output logic  [8:0]                cache_mem_addr1          , // Address
+        input  logic  [31:0]               cache_mem_dout1           // Read Data
 
 );
 
 // Parameters
+
+parameter CACHE_LINE_WD = $clog2(CACHESIZE);
+// TAG compare Address Low & High, 
+//parameter CACHE_TAG_CMP_ADDR_L = CACHE_LINE_WD+2;
+//parameter CACHE_TAG_CMP_ADDR_H = TAG_MEM_WD+CACHE_TAG_CMP_ADDR_L;
 
 // Total cache memory = 16 * 32 * 4 = 2048 (2KB)
 
@@ -188,14 +192,28 @@ localparam	IDLE		         = 4'd0,	//Please read Description for explanation of S
 		CACHE_RDATA_FETCH1       = 4'd2,
 		CACHE_RDATA_FETCH2       = 4'd3,
 		CACHE_RDATA_FETCH3       = 4'd4,
-		PREFETCH_WAIT            = 4'd5,
-		CACHE_REFILL_WAIT        = 4'd6,
-		CACHE_REFILL_DONE        = 4'd7,
-		CACHE_PREFILL_WAIT       = 4'd8,
-		CACHE_PREFILL_DONE       = 4'd9,
-		NEXT_CACHE_REFILL_REQ    = 4'd10,
-		NEXT_CACHE_REFILL_REQ_DONE    = 4'd11;
+		PREFETCH_START           = 4'd5,
+		PREFETCH_WAIT            = 4'd6,
+		CACHE_REFILL_WAIT        = 4'd7,
+		CACHE_REFILL_DONE        = 4'd8,
+		CACHE_PREFILL_WAIT       = 4'd9,
+		CACHE_PREFILL_DONE       = 4'd10,
+		NEXT_CACHE_REFILL_REQ    = 4'd11;
 
+//// CACHE SRAM Memory I/F
+//logic                             cache_mem_clk0           ; // CLK
+//logic                             cache_mem_csb0           ; // CS#
+//logic                             cache_mem_web0           ; // WE#
+//logic   [8:0]                     cache_mem_addr0          ; // Address
+//logic   [3:0]                     cache_mem_wmask0         ; // WMASK#
+//logic   [31:0]                    cache_mem_din0           ; // Write Data
+//logic   [31:0]                    cache_mem_dout0          ; // Read Data
+//
+//// SRAM-0 PORT-1, IMEM I/F
+//logic                             cache_mem_clk1           ; // CLK
+//logic                             cache_mem_csb1           ; // CS#
+//logic  [8:0]                      cache_mem_addr1          ; // Address
+//logic  [31:0]                     cache_mem_dout1          ; // Read Data
 
 // Tag Memory Wire decleration
 logic 	                          tag_wr                   ; // Tag Write Indication
@@ -214,7 +232,7 @@ logic [$clog2(TAG_MEM_DP)-1:0]    tag_hindex               ; // Tag Hit Index
 logic                             tag_cdirty               ; // Current location Dirty indication
 logic  [`TAG_XLEN-1:0]            tag_ctag                 ; // Tag Compare Data
 
-logic [$clog2(CACHESIZE)-1:0]     cache_mem_ptr            ; // Cache Memory Pointer
+logic [CACHE_LINE_WD-1:0]         cache_mem_ptr            ; // Cache Memory Pointer
 
 
 // Internal Signals derived from respective data or address buses
@@ -228,7 +246,7 @@ logic [MEM_BL-1:0]               cpu_bl_l               ;
 logic [WB_AW-1:0]                cache_refill_addr         ;
 
 logic   [WB_DW-1:0]               prefetch_data            ; // Additional Prefetch on next location of current location
-logic [$clog2(CACHESIZE)-1:0]     prefetch_ptr             ; // Prefetch Ptr
+logic [CACHE_LINE_WD-1:0]         prefetch_ptr             ; // Prefetch Ptr
 logic [$clog2(TAG_MEM_DP)-1:0]    prefetch_index           ; // Prefetch Index
 logic                             prefetch_val             ;
 
@@ -242,54 +260,9 @@ logic                             cache_refill_req         ; // Request for Refi
 logic                             cache_prefill_req        ; // Request for complete prefill 32 x 16
 logic                             cache_busy               ; // Request for complete prefill 32 x 16
 
-// CACHE SRAM Memory I/F
-logic                       cache_mem_clk0           ; // CLK
-logic                       cache_mem_csb0           ; // CS#
-logic                       cache_mem_web0           ; // WE#
-logic   [8:0]               cache_mem_addr0          ; // Address
-logic   [3:0]               cache_mem_wmask0         ; // WMASK#
-logic   [31:0]              cache_mem_din0           ; // Write Data
-//logic   [31:0]            cache_mem_dout0          ; // Read Data
-        
-// SRAM-0 PORT-1, IMEM I/F
-logic                       cache_mem_csb1           ; // CS#
-logic  [8:0]                cache_mem_addr1          ; // Address
-logic  [31:0]               cache_mem_dout1          ; // Read Data
 
+assign cache_mem_clk1 = mclk;
 
-//---------------------------------------------------------------------------
-// Signal Transalation from SRAM to dffram i/f
-// cache_dffram_en - dffram enable is active high
-// 2KB SRAM spitted into 2DFFRAM with 1KB Each
-// -------------------------------------------------------------------------
-
-logic                       cache_dffram_en        ; // CLK
-logic    [8:0]              cache_dffram_addr      ; // Address
-
-
-assign cache_dffram_en     =  !(cache_mem_csb0 & cache_mem_csb1);
-assign cache_dffram_addr   =  (cache_mem_csb0 == 1'b0) ? cache_mem_addr0 : (cache_mem_csb1 == 1'b0) ? cache_mem_addr1 : 'h0;
-
-assign cache_dffram_clk0   =  mclk;
-assign cache_dffram_clk1   =  mclk;
-
-assign cache_dffram_cs0    =  (cache_dffram_en) && (cache_dffram_addr[8] == 0);
-assign cache_dffram_cs1    =  (cache_dffram_en) && (cache_dffram_addr[8] == 1);
-
-assign cache_dffram_addr0  =  cache_dffram_addr[7:0];
-assign cache_dffram_addr1  =  cache_dffram_addr[7:0];
-
-// CSB0 support both write and read action
-// CSB1 support only read action
-assign cache_dffram_wmask0 =  (cache_mem_csb0 == 1'b0 && cache_dffram_cs0) ? cache_mem_wmask0: 'h0;
-assign cache_dffram_wmask1 =  (cache_mem_csb0 == 1'b0 && cache_dffram_cs1) ? cache_mem_wmask0: 'h0;
-
-assign cache_dffram_din0   =  cache_mem_din0;
-assign cache_dffram_din1   =  cache_mem_din0;
-
-assign cache_mem_dout1    =   (cache_dffram_cs0) ? cache_dffram_dout0 : cache_dffram_dout1;
-
-//--------------------------------------------------------
 
 // State Variables
 reg [3:0] state;
@@ -342,21 +315,17 @@ assign tag_cmp_data = cpu_addr_l[26:7];
 assign cache_hit = |tag_hit;
 assign cache_next_hit = |tag_next_hit;
 
-wire [$clog2(CACHESIZE)-1:0]  next_prefetch_ptr = prefetch_ptr[4:0] + 1;
+wire [CACHE_LINE_WD-1:0]  next_prefetch_ptr = prefetch_ptr[CACHE_LINE_WD-1:0] + 1;
 
 // Cache Controller State Machine and Logic
 
 
-// Generate Response saying request is accepted
-assign cpu_mem_req_ack = (state == IDLE) && (
-	           (!cfg_pfet_dis && cpu_mem_req && prefetch_val && 
-		     (cpu_mem_addr[31:2] == {cpu_addr_l[31:7], prefetch_ptr[4:0]})) ||
-                   ( cpu_mem_req && (cpu_mem_resp == 2'b00)));
 
 always@(posedge mclk or negedge rst_n)
 begin
    if(!rst_n)
    begin
+      cpu_mem_req_ack   <= '0;
       cpu_mem_rdata     <= '0;
       cpu_mem_resp      <= 2'b00;
 
@@ -391,35 +360,16 @@ begin
 	// Check if the current address is next location of same cache offset
 	// if yes, pick the data from prefetch content
 	 if(!cfg_pfet_dis && cpu_mem_req && prefetch_val && 
-	     (cpu_mem_addr[31:2] == {cpu_addr_l[31:7], prefetch_ptr[4:0]})) begin
-	     // Ack with Prefect data
-              cpu_mem_rdata    <= ycr_conv_wb2mem_rdata(cpu_mem_width,cpu_mem_addr[1:0], prefetch_data);
-	      if(cpu_mem_bl == 'h1)
-	          cpu_mem_resp     <= 2'b11; // Last Access
-	      else
-	          cpu_mem_resp     <= 2'b01;
-
-	      // Goahead for next data prefetech in same cache index
-	      cache_mem_addr1  <= {prefetch_index,next_prefetch_ptr[4:0]}; // Address for additional prefetch;
-	      prefetch_ptr     <= next_prefetch_ptr+1;
-	      cpu_width_l      <= cpu_mem_width;
-              cpu_bl_l         <= cpu_mem_bl-1;
-              cpu_addr_l[31:2] <= cpu_mem_addr[31:2]+1;
-              cpu_addr_l[1:0]  <= 2'b0; // Next data will be 32 bit aligned access
-	      if(&cpu_mem_addr[6:2] && cpu_mem_bl > 'h1) begin //cache line change over
-	          cache_mem_csb1   <= 1'b1;
-	          state            <= TAG_COMPARE;
-	      end else begin
-	          cache_mem_csb1   <= 1'b0;
-	          state            <= PREFETCH_WAIT;
-	      end
-
+	     (cpu_mem_addr[31:2] == {cpu_addr_l[31:7], prefetch_ptr[CACHE_LINE_WD-1:0]})) begin
+             cpu_mem_req_ack  <= '1;
+	     state            <= PREFETCH_START;
          end else begin
 	    cpu_mem_resp      <= 2'b00;
 	    cache_mem_addr1   <= '0;
 	    cache_mem_csb1    <= 1'b1;
 
 	    if(cpu_mem_req && (cpu_mem_resp == 2'b00)) begin
+                cpu_mem_req_ack  <= '1;
 	        cpu_addr_l       <= cpu_mem_addr;
 		cpu_width_l      <= cpu_mem_width;
 		cpu_bl_l         <= cpu_mem_bl;
@@ -445,6 +395,7 @@ begin
       //----------------------------------------------------
 
       TAG_COMPARE	:begin
+         cpu_mem_req_ack  <= '0;
 	 cpu_mem_resp     <= 2'b00; // Disable Ack
          case(cache_hit)
 	 1'd0:begin // If there is no Tag Hit
@@ -479,7 +430,7 @@ begin
        CACHE_RDATA_FETCH2: begin
           cpu_mem_rdata     <= ycr_conv_wb2mem_rdata(cpu_width_l,cpu_addr_l[1:0], cache_mem_dout1); 
 	  if(cpu_bl_l == 'h1) begin // Check if it's last access of burst
-	      cache_mem_csb1   <= 1'b0;
+	      cache_mem_csb1   <= 1'b1;
 	      cpu_mem_resp     <= 2'b11; // Last Ack
 	      prefetch_ptr     <=  cpu_addr_l[6:2]+1; // reset the prefetch pointer
 	      state            <= CACHE_RDATA_FETCH3;
@@ -501,19 +452,41 @@ begin
        end
        // Do Additial prefetech for next location
        CACHE_RDATA_FETCH3: begin
-	  cache_mem_csb1   <= 1'b1;
           prefetch_data    <= cache_mem_dout1;
           prefetch_val     <= 1'b1;
 	  cpu_mem_resp     <= 2'b00;
 	  state            <= IDLE;
        end
+       PREFETCH_START: begin
+              cpu_mem_req_ack  <= '0;
+              cpu_mem_rdata    <= ycr_conv_wb2mem_rdata(cpu_mem_width,cpu_mem_addr[1:0], prefetch_data);
+	      if(cpu_mem_bl == 'h1)
+	          cpu_mem_resp     <= 2'b11; // Last Access
+	      else
+	          cpu_mem_resp     <= 2'b01;
+
+	      // Goahead for next data prefetech in same cache index
+	      cache_mem_addr1  <= {prefetch_index,next_prefetch_ptr[CACHE_LINE_WD-1:0]}; // Address for additional prefetch;
+	      prefetch_ptr     <= next_prefetch_ptr+1;
+	      cpu_width_l      <= cpu_mem_width;
+              cpu_bl_l         <= cpu_mem_bl-1;
+              cpu_addr_l[31:2] <= cpu_mem_addr[31:2]+1;
+              cpu_addr_l[1:0]  <= 2'b0; // Next data will be 32 bit aligned access
+	      if(&cpu_mem_addr[6:2] && cpu_mem_bl > 'h1) begin //cache line change over
+	          cache_mem_csb1   <= 1'b1;
+	          state            <= TAG_COMPARE;
+	      end else begin
+	          cache_mem_csb1   <= 1'b0;
+	          state            <= PREFETCH_WAIT;
+	      end
+	end
 
        // Additional Prefetch delay do to take care of RAM Two cycle access
        PREFETCH_WAIT: begin
 	  cpu_mem_resp     <= 2'b00;
 	  // If current command is single burst
 	  if(cpu_bl_l == 'h0) begin
-	     cache_mem_csb1   <= 1'b0;
+	     cache_mem_csb1   <= 1'b1;
 	     state            <= CACHE_RDATA_FETCH3;
 	  end else begin // Current command is multi burst
 	      cache_mem_csb1   <= 1'b0;
@@ -560,15 +533,6 @@ begin
       // Wait for Req accepted by application fsm
       NEXT_CACHE_REFILL_REQ: begin
 	  if(cache_busy == 1) begin
-	     cache_refill_req <= 0;
-	     state            <= NEXT_CACHE_REFILL_REQ_DONE;
-	  end
-      end
-      // Wait for cache access completion,
-      // As DFRAM has only one write and read port compare to SRAM
-      // 1WR/RD and 1RD port
-      NEXT_CACHE_REFILL_REQ_DONE: begin
-	  if(cache_busy == 0) begin
 	     cache_refill_req <= 0;
 	     state            <= IDLE;
 	  end

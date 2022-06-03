@@ -715,6 +715,7 @@ always_ff @(negedge rst_n, posedge clk) begin
 end
 
 `ifdef YCR_RVC_EXT
+wire instr_rvc = exu_queue.instr_rvc;
 assign inc_pc = pc_curr_ff + (exu_queue.instr_rvc ? `YCR_XLEN'd2 : `YCR_XLEN'd4);
 `else // ~YCR_RVC_EXT
 assign inc_pc = pc_curr_ff + `YCR_XLEN'd4;
