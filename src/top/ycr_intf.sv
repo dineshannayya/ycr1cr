@@ -63,11 +63,13 @@ module ycr_intf (
     input   logic                           core_clk                  , // Core clock
     input   logic                           cpu_intf_rst_n            , // CPU interface reset
 
-    input   logic                           cfg_icache_pfet_dis       ,
-    input   logic                           cfg_icache_ntag_pfet_dis  ,
+    input   logic                           cfg_icache_pfet_dis       , // disable icache prefetch
+    input   logic                           cfg_icache_ntag_pfet_dis  , // disable tag preftech
+    input   logic                           cfg_bypass_icache         , // icache disabled
 
-    input   logic                           cfg_dcache_pfet_dis       ,
-    input   logic                           cfg_dcache_force_flush    ,
+    input   logic                           cfg_dcache_pfet_dis       , // disable dcache prefetch
+    input   logic                           cfg_dcache_force_flush    , // force dcache flush
+    input   logic                           cfg_bypass_dcache         , // dcache disabled
 
     input   logic [1:0]                     cfg_sram_lphase           ,  // SRAM data lanuch phase selection
 
@@ -99,6 +101,7 @@ module ycr_intf (
     input    logic                          core_dmem_cmd             ,
     input    logic [1:0]                    core_dmem_width           ,
     input    logic [`YCR_DMEM_AWIDTH-1:0]   core_dmem_addr            ,
+    input    logic [`YCR_IMEM_BSIZE-1:0]    core_dmem_bl              ,
     input    logic [`YCR_DMEM_DWIDTH-1:0]   core_dmem_wdata           ,
     //--------------------------------------------
     // Wishbone  
@@ -113,8 +116,11 @@ module ycr_intf (
     output  logic                           wbd_dmem_we_o             , // write
     output  logic   [YCR_WB_WIDTH-1:0]      wbd_dmem_dat_o            , // data output
     output  logic   [3:0]                   wbd_dmem_sel_o            , // byte enable
+    output  logic   [YCR_WB_BL_DMEM-1:0]    wbd_dmem_bl_o             , // byte enable
+    output  logic                           wbd_dmem_bry_o            , // burst ready
     input   logic   [YCR_WB_WIDTH-1:0]      wbd_dmem_dat_i            , // data input
     input   logic                           wbd_dmem_ack_i            , // acknowlegement
+    input   logic                           wbd_dmem_lack_i           , // last ack
     input   logic                           wbd_dmem_err_i            , // error
 
    `ifdef YCR_ICACHE_EN
@@ -300,6 +306,7 @@ icache_top  #(.MEM_BL(`YCR_IMEM_BSIZE) )u_icache (
 
 	.cfg_pfet_dis                 (cfg_icache_pfet_dis),// To disable Next Pre data Pre fetch, default = 0
 	.cfg_ntag_pfet_dis            (cfg_icache_ntag_pfet_dis),// To disable next Tag refill, default = 0
+	.cfg_bypass_icache            (cfg_bypass_icache), 
 
 	// Wishbone CPU I/F
         .cpu_mem_req                 (core_icache_req),        // strobe/request
@@ -422,6 +429,7 @@ dcache_top  u_dcache (
 
 	.cfg_pfet_dis                 (cfg_dcache_pfet_dis),   // To disable Next Pre data Pre fetch, default = 0
 	.cfg_force_flush              (cfg_dcache_force_flush),// Force flush
+	.cfg_bypass_dcache            (cfg_bypass_dcache), 
 
 	// Wishbone CPU I/F
         .cpu_mem_req                 (core_dcache_req),        // strobe/request
@@ -549,6 +557,7 @@ ycr_dmem_wb i_dmem_wb (
     .dmem_cmd       (core_dmem_cmd       ),
     .dmem_width     (core_dmem_width     ),
     .dmem_addr      (core_dmem_addr      ),
+    .dmem_bl        (core_dmem_bl        ),
     .dmem_wdata     (core_dmem_wdata     ),
     .dmem_rdata     (core_dmem_rdata     ),
     .dmem_resp      (core_dmem_resp      ),
@@ -560,8 +569,11 @@ ycr_dmem_wb i_dmem_wb (
     .wbd_we_o       (wbd_dmem_we_o     ),  
     .wbd_dat_o      (wbd_dmem_dat_o    ), 
     .wbd_sel_o      (wbd_dmem_sel_o    ), 
+    .wbd_bl_o       (wbd_dmem_bl_o     ), 
+    .wbd_bry_o      (wbd_dmem_bry_o     ), 
     .wbd_dat_i      (wbd_dmem_dat_i    ), 
     .wbd_ack_i      (wbd_dmem_ack_i    ), 
+    .wbd_lack_i     (wbd_dmem_lack_i    ), 
     .wbd_err_i      (wbd_dmem_err_i    )
 );
 

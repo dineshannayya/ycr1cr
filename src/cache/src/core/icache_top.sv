@@ -135,6 +135,7 @@ module icache_top #(
 
 	input logic                        cfg_pfet_dis,      // To disable Next Pre data Pre fetch, default = 0
 	input logic                        cfg_ntag_pfet_dis, // To disable next Tag refill, default = 0
+	input logic                        cfg_bypass_icache, // icache disabled
 
 	//  CPU I/F
         input logic                        cpu_mem_req,  // strobe/request
@@ -345,7 +346,7 @@ begin
       cache_mem_hval    <= 1'b0;
       cache_mem_hdata   <= '0;
       cache_refill_req  <= '0;
-      cache_prefill_req <= '1;
+      cache_prefill_req <= '0;
       cache_refill_addr <= '0;
 
       state             <= CACHE_PREFILL_WAIT;
@@ -356,10 +357,12 @@ begin
 
 	 cache_mem_ptr     <= '0;
 
-
+	 if(cfg_bypass_icache) begin
+	     state            <= IDLE;
+	 end
 	// Check if the current address is next location of same cache offset
 	// if yes, pick the data from prefetch content
-	 if(!cfg_pfet_dis && cpu_mem_req && prefetch_val && 
+	 else if(!cfg_pfet_dis && cpu_mem_req && prefetch_val && 
 	     (cpu_mem_addr[31:2] == {cpu_addr_l[31:7], prefetch_ptr[CACHE_LINE_WD-1:0]})) begin
              cpu_mem_req_ack  <= '1;
 	     state            <= PREFETCH_START;
@@ -517,10 +520,14 @@ begin
       // and does complete cache line fill in one go
       // --------------------------------------------------------
       CACHE_PREFILL_WAIT: begin
-	  if(cache_busy == 1) begin
+	 if(cfg_bypass_icache) begin
+	     state            <= IDLE;
+	 end else if(cache_busy == 1) begin
 	     cache_prefill_req <= 0;
-	     state       <= CACHE_PREFILL_DONE;
-	  end
+	     state             <= CACHE_PREFILL_DONE;
+         end else begin
+	     cache_prefill_req <= 1;
+         end
       end
 
      CACHE_PREFILL_DONE: begin
@@ -606,8 +613,8 @@ icache_app_fsm  #(
         .cache_mem_wmask0             (cache_mem_wmask0    ), // WMASK#
         .cache_mem_din0               (cache_mem_din0      ), // Write Data
                                                            
-        .cache_refill_req             (cache_refill_req    ),
-        .cache_prefill_req            (cache_prefill_req   ),
+        .cache_refill_req             (cache_refill_req    ), // cache re-fill request
+        .cache_prefill_req            (cache_prefill_req   ), // cache pre fill request
 	.cache_busy                   (cache_busy          )
 
 

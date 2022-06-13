@@ -74,8 +74,10 @@ logic   [YCR_WB_WIDTH-1:0]             wbd_dmem_adr_o; // address
 logic                                   wbd_dmem_we_o;  // write
 logic   [YCR_WB_WIDTH-1:0]             wbd_dmem_dat_o; // data output
 logic   [3:0]                           wbd_dmem_sel_o; // byte enable
+logic   [YCR_WB_BL_DMEM-1:0]           wbd_dmem_bl_o; // byte enable
 logic   [YCR_WB_WIDTH-1:0]             wbd_dmem_dat_i; // data input
 logic                                   wbd_dmem_ack_i; // acknowlegement
+logic                                   wbd_dmem_lack_i; // acknowlegement
 logic                                   wbd_dmem_err_i; // error
 
 int unsigned                            f_results     ;
@@ -373,6 +375,8 @@ ycr_top_wb i_top (
     .cpu_intf_rst_n         (rst_n                  ),
     .cfg_sram_lphase        (4'hF                   ),
     .cfg_cache_ctrl         (3'b0                   ),
+    .cfg_bypass_icache      (1'b0                   ),
+    .cfg_bypass_dcache      (1'b0                   ),
 
 `ifdef YCR_DBG_EN
     .sys_rst_n_o            (                       ),
@@ -506,8 +510,10 @@ ycr_top_wb i_top (
     .wbd_dmem_we_o          (wbd_dmem_we_o          ),
     .wbd_dmem_dat_o         (wbd_dmem_dat_o         ),
     .wbd_dmem_sel_o         (wbd_dmem_sel_o         ),
+    .wbd_dmem_bl_o          (wbd_dmem_bl_o          ),
     .wbd_dmem_dat_i         (wbd_dmem_dat_i         ),
     .wbd_dmem_ack_i         (wbd_dmem_ack_i         ),
+    .wbd_dmem_lack_i        (wbd_dmem_lack_i        ),
     .wbd_dmem_err_i         (wbd_dmem_err_i         )
 
 );
@@ -635,9 +641,10 @@ ycr_memory_tb_wb #(
     .wbd_dmem_we_i          (wbd_dmem_we_o          ),
     .wbd_dmem_dat_i         (wbd_dmem_dat_o         ),
     .wbd_dmem_sel_i         (wbd_dmem_sel_o         ),
-    .wbd_dmem_bl_i          ('h1                    ),
+    .wbd_dmem_bl_i          (wbd_dmem_bl_o          ),
     .wbd_dmem_dat_o         (wbd_dmem_dat_i         ),
     .wbd_dmem_ack_o         (wbd_dmem_ack_i         ),
+    .wbd_dmem_lack_o        (wbd_dmem_lack_i        ),
     .wbd_dmem_err_o         (wbd_dmem_err_i         )
 
 );

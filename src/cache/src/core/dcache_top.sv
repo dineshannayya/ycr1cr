@@ -157,6 +157,8 @@ module dcache_top #(
 
 	input logic                        cfg_pfet_dis,      // To disable Next Pre data Pre fetch, default = 0
 	input logic                        cfg_force_flush,   // Flush all the content to memory with dirty
+	input logic                        cfg_bypass_dcache, // dcache disabled
+
 	output logic                       force_flush_done,
 
 	//  CPU I/F
@@ -496,9 +498,13 @@ begin
 	 tag_uptr          <= '0;
 	 tag_wdata         <= '0;
 
+	 if(cfg_bypass_dcache) begin
+	     state            <= IDLE;
+	 end
+
 	// Check if the current address is next location of same cache offset
 	// if yes, pick the data from prefetch content
-	 if(!cfg_pfet_dis && cpu_mem_req && (!cpu_mem_cmd) && prefetch_val && 
+	 else if(!cfg_pfet_dis && cpu_mem_req && (!cpu_mem_cmd) && prefetch_val && 
 	     (cpu_mem_addr[31:2] == {cpu_addr_l[31:7], prefetch_ptr[4:0]})) begin
 	      cpu_mem_req_ack  <= 1'b1;
 	      state            <= PREFETCH_START;
@@ -758,6 +764,9 @@ begin
 
        // Prefill all the cache location with 512 word burst command
        CACHE_PREFILL_REQ: begin
+	 if(cfg_bypass_dcache) begin
+	     state            <= IDLE;
+	 end else begin
 	      wb_app_stb_o      <= 1'b1;
 	      wb_app_we_o       <= 1'b0;
 	      wb_app_adr_o      <= {DMEM_BASE,20'h0,5'b0,2'b0};
@@ -766,6 +775,7 @@ begin
               cache_mem_ptr     <= '0;
               cache_mem_offset  <= '0;
 	      state             <= CACHE_PREFILL_ACTION;
+	  end
        end
        // CACHE Prefill action based on application ack
        // Based on ack increment for ptr, 

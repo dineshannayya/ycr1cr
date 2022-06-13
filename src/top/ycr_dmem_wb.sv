@@ -57,22 +57,26 @@ module ycr_dmem_wb (
     input   logic                           dmem_req,
     input   logic                           dmem_cmd,
     input   logic [1:0]                     dmem_width,
-    input   logic   [YCR_WB_WIDTH-1:0]     dmem_addr,
-    input   logic   [YCR_WB_WIDTH-1:0]     dmem_wdata,
-    output  logic   [YCR_WB_WIDTH-1:0]     dmem_rdata,
+    input   logic   [YCR_WB_WIDTH-1:0]      dmem_addr,
+    input   logic   [YCR_WB_BL_DMEM-1:0]    dmem_bl,
+    input   logic   [YCR_WB_WIDTH-1:0]      dmem_wdata,
+    output  logic   [YCR_WB_WIDTH-1:0]      dmem_rdata,
     output  logic [1:0]                     dmem_resp,
 
     // WB Interface
-    input   logic                           wb_rst_n,   // wishbone reset
-    input   logic                           wb_clk,     // wishbone clock
-    output  logic                           wbd_stb_o, // strobe/request
+    input   logic                          wb_rst_n,   // wishbone reset
+    input   logic                          wb_clk,     // wishbone clock
+    output  logic                          wbd_stb_o, // strobe/request
     output  logic   [YCR_WB_WIDTH-1:0]     wbd_adr_o, // address
-    output  logic                           wbd_we_o,  // write
+    output  logic                          wbd_we_o,  // write
     output  logic   [YCR_WB_WIDTH-1:0]     wbd_dat_o, // data output
-    output  logic   [3:0]                   wbd_sel_o, // byte enable
+    output  logic   [3:0]                  wbd_sel_o, // byte enable
+    output  logic   [YCR_WB_BL_DMEM-1:0]   wbd_bl_o, // byte enable
+    output  logic                          wbd_bry_o, // Burst ready
     input   logic   [YCR_WB_WIDTH-1:0]     wbd_dat_i, // data input
-    input   logic                           wbd_ack_i, // acknowlegement
-    input   logic                           wbd_err_i  // error
+    input   logic                          wbd_ack_i, // acknowlegement
+    input   logic                          wbd_lack_i, // acknowlegement
+    input   logic                          wbd_err_i  // error
 
 );
 
@@ -85,16 +89,17 @@ module ycr_dmem_wb (
 //-------------------------------------------------------------------------------
 
 typedef struct packed {
-    logic [3:0]                     hbel;
+    logic [3:0]                     hbe;
     logic                           hwrite;
     logic   [2:0]                   hwidth;
-    logic   [YCR_WB_WIDTH-1:0]     haddr;
-    logic   [YCR_WB_WIDTH-1:0]     hwdata;
+    logic   [YCR_WB_WIDTH-1:0]      haddr;
+    logic   [YCR_WB_BL_DMEM-1:0]    hbl;
+    logic   [YCR_WB_WIDTH-1:0]      hwdata;
 } type_ycr_req_fifo_s;
 
 
 typedef struct packed {
-    logic                           hresp;
+    logic   [1:0]                   hresp;
     logic   [2:0]                   hwidth;
     logic   [1:0]                   haddr;
     logic   [YCR_WB_WIDTH-1:0]    hrdata;
@@ -128,8 +133,8 @@ endfunction
 
 function automatic logic[YCR_WB_WIDTH-1:0] ycr_conv_mem2wb_wdata (
     input   logic   [1:0]                   dmem_addr,
-    input   logic [1:0]                     dmem_width,
-    input   logic   [YCR_WB_WIDTH-1:0]    dmem_wdata
+    input   logic   [1:0]                   dmem_width,
+    input   logic   [YCR_WB_WIDTH-1:0]      dmem_wdata
 );
     logic   [YCR_WB_WIDTH-1:0]  tmp;
 begin
@@ -225,28 +230,30 @@ logic                                       req_fifo_afull;
 logic                                       resp_fifo_rd;
 logic                                       resp_fifo_empty;
 logic                                       resp_fifo_full;
+logic                                       resp_fifo_afull;
 
 
 //-------------------------------------------------------------------------------
 // REQ_FIFO (CORE to WB)
 //-------------------------------------------------------------------------------
-wire	                 hwrite_in = (dmem_cmd == YCR_MEM_CMD_WR);
-wire [2:0]               hwidth_in = ycr_conv_mem2wb_width(dmem_width);
-wire [YCR_WB_WIDTH-1:0] haddr_in  = dmem_addr;
-wire [YCR_WB_WIDTH-1:0] hwdata_in = ycr_conv_mem2wb_wdata(dmem_addr[1:0], dmem_width, dmem_wdata);
+wire	                  hwrite_in = (dmem_cmd == YCR_MEM_CMD_WR);
+wire [2:0]                hwidth_in = ycr_conv_mem2wb_width(dmem_width);
+wire [YCR_WB_WIDTH-1:0]   haddr_in  = dmem_addr;
+wire [YCR_WB_BL_DMEM-1:0] hbl_in    = dmem_bl;
+wire [YCR_WB_WIDTH-1:0]   hwdata_in = ycr_conv_mem2wb_wdata(dmem_addr[1:0], dmem_width, dmem_wdata);
 
-reg  [3:0]              hbel_in; // byte select
+reg  [3:0]              hbe_in; // byte select
 always_comb begin
-	hbel_in = 0;
+	hbe_in = 0;
     case (hwidth_in)
         YCR_DSIZE_8B : begin
-            hbel_in = 4'b0001 << haddr_in[1:0];
+            hbe_in = 4'b0001 << haddr_in[1:0];
         end
         YCR_DSIZE_16B : begin
-            hbel_in = 4'b0011 << haddr_in[1:0];
+            hbe_in = 4'b0011 << haddr_in[1:0];
         end
         YCR_DSIZE_32B : begin
-            hbel_in = 4'b1111;
+            hbe_in = 4'b1111;
         end
     endcase
 end
@@ -271,15 +278,16 @@ end
 assign req_fifo_wr         = dmem_req_ack;
 
 //pack data in
-assign req_fifo_din.hbel   =  hbel_in;
+assign req_fifo_din.hbe    =  hbe_in;
 assign req_fifo_din.hwrite =  hwrite_in;
 assign req_fifo_din.hwidth =  hwidth_in;
 assign req_fifo_din.haddr  =  haddr_in;
+assign req_fifo_din.hbl    =  hbl_in;
 assign req_fifo_din.hwdata =  hwdata_in;
 
 
  async_fifo #(
-      .W(YCR_WB_WIDTH+YCR_WB_WIDTH+3+1+4), // Data Width
+      .W(YCR_WB_WIDTH+YCR_WB_WIDTH+YCR_WB_BL_DMEM+3+1+4), // Data Width
       .DP(4),            // FIFO DEPTH
       .WR_FAST(1),       // We need FF'ed Full
       .RD_FAST(1)        // We need FF'ed Empty
@@ -297,14 +305,14 @@ assign req_fifo_din.hwdata =  hwdata_in;
         .rd_reset_n (wb_rst_n        ),
         .rd_en      (req_fifo_rd     ),
         .empty      (req_fifo_empty  ),                
-        .aempty     (                ),                
+        .aempty     (req_fifo_aempty ),                
         .rd_data    (req_fifo_dout   )
       );
 
 
 always_comb begin
     req_fifo_rd = 1'b0;
-    if (wbd_ack_i) begin
+    if (wbd_lack_i) begin
          req_fifo_rd = ~req_fifo_empty;
     end
 end
@@ -316,8 +324,13 @@ assign wbd_stb_o    = ~req_fifo_empty;
 assign wbd_adr_o    = (req_fifo_empty) ? 'h0 : req_fifo_dout.haddr;
 assign wbd_we_o     = (req_fifo_empty) ? 'h0 : req_fifo_dout.hwrite;
 assign wbd_dat_o    = (req_fifo_empty) ? 'h0 : req_fifo_dout.hwdata;
-assign wbd_sel_o    = (req_fifo_empty) ? 'h0 : req_fifo_dout.hbel;
+assign wbd_sel_o    = (req_fifo_empty) ? 'h0 : req_fifo_dout.hbe;
+assign wbd_bl_o     = (req_fifo_empty) ? 'h0 : req_fifo_dout.hbl;
 
+// Burst Ready indication, During write phase check the Request fifo status
+// and Read phase check the response fifo status
+assign wbd_bry_o    = (wbd_we_o) ? !req_fifo_empty :
+	               (!resp_fifo_full & !resp_fifo_afull); 
 
 //-------------------------------------------------------------------------------
 // Response path - Used by Read path logic
@@ -326,13 +339,16 @@ type_ycr_resp_fifo_s                       resp_fifo_din;
 type_ycr_resp_fifo_s                       resp_fifo_dout;
 
 
-assign  resp_fifo_din.hresp  = (wbd_err_i) ? 1'b0 : 1'b1;
+assign  resp_fifo_din.hresp  = (wbd_err_i) ? YCR_MEM_RESP_RDY_ER: 
+	                       (wbd_ack_i && !wbd_lack_i)  ? YCR_MEM_RESP_RDY_OK :
+	                       (wbd_ack_i && wbd_lack_i)   ? YCR_MEM_RESP_RDY_LOK :
+			       YCR_MEM_RESP_NOTRDY;
 assign  resp_fifo_din.hwidth = req_fifo_dout.hwidth;
 assign  resp_fifo_din.haddr  = req_fifo_dout.haddr[1:0];
 assign  resp_fifo_din.hrdata = (wbd_we_o) ? 'h0: wbd_dat_i;
 
  async_fifo #(
-      .W(YCR_WB_WIDTH+2+3+1), // Data Width
+      .W(YCR_WB_WIDTH+3+3+1), // Data Width
       .DP(4),            // FIFO DEPTH
       .WR_FAST(1),       // We need FF'ed Full
       .RD_FAST(1)        // We need FF'ed Empty
@@ -342,8 +358,8 @@ assign  resp_fifo_din.hrdata = (wbd_we_o) ? 'h0: wbd_dat_i;
         .wr_reset_n  (wb_rst_n               ),
         .wr_en       (wbd_ack_i              ),
         .wr_data     (resp_fifo_din          ),
-        .full        (                       ), // Assmed FIFO will never be full as it's Response a Single Request
-        .afull       (                       ),                 
+        .full        (resp_fifo_full         ), 
+        .afull       (resp_fifo_afull        ),                 
 
     // RD Clock
         .rd_clk     (core_clk                ),
@@ -363,11 +379,7 @@ always_ff @(posedge core_clk, negedge core_rst_n) begin
       dmem_resp <= '0;
    end else begin
       dmem_rdata <= (resp_fifo_rd) ? ycr_conv_wb2mem_rdata(resp_fifo_dout.hwidth, resp_fifo_dout.haddr, resp_fifo_dout.hrdata) : 'h0;
-      dmem_resp  <= (resp_fifo_rd)
-                          ? (resp_fifo_dout.hresp == 1'b1)
-                              ? YCR_MEM_RESP_RDY_OK
-                              : YCR_MEM_RESP_RDY_ER
-                          : YCR_MEM_RESP_NOTRDY ;
+      dmem_resp  <= (resp_fifo_rd) ? resp_fifo_dout.hresp : YCR_MEM_RESP_NOTRDY ;
    end
 end
 

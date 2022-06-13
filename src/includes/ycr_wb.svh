@@ -48,6 +48,7 @@
 `include "ycr_arch_description.svh"
 
 parameter YCR_WB_WIDTH  = 32;
+parameter YCR_WB_BL_DMEM= 3;
 
 // Encoding for DATA SIZE
 parameter logic [2:0] YCR_DSIZE_8B    = 3'b000;

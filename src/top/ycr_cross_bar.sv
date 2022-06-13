@@ -45,6 +45,9 @@ module ycr_cross_bar (
     input   logic                           rst_n,
     input   logic                           clk,
 
+    input   logic                           cfg_bypass_icache,  // 1 => Bypass icache
+    input   logic                           cfg_bypass_dcache,  // 1 => Bypass dcache
+
     // Core-0 imem interface
     output  logic                          core0_imem_req_ack,
     input   logic                          core0_imem_req,
@@ -319,12 +322,12 @@ end
 
 
 //-------------------------------------------------------------------------
-// Burst is only support in icache and rest of the interface support only
+// Burst is only support in icache & dmem and rest of the interface support only
 // single burst, as cross-bar expect last burst access to exit the grant,
 // we are generting LOK for dcache, tcm,timer,dmem interface
 // ------------------------------------------------------------------------
                
-wire [1:0] port0_resp_t   = {2{port0_resp[0]}};
+wire [1:0] port0_resp_t   = port0_resp;
 
 
 ycr_router  u_router_p0 (
@@ -569,9 +572,9 @@ function type_ycr_sel_e      func_taget_id;
 input [`YCR_DMEM_AWIDTH-1:0] mem_addr;
 begin
    func_taget_id    = YCR_SEL_PORT0;
-   if ((mem_addr & YCR_ICACHE_ADDR_MASK) == YCR_ICACHE_ADDR_PATTERN) begin
+   if (((mem_addr & YCR_ICACHE_ADDR_MASK) == YCR_ICACHE_ADDR_PATTERN) && (cfg_bypass_icache == 1'b0)) begin
        func_taget_id    = YCR_SEL_PORT1;
-   end else if ((mem_addr & YCR_DCACHE_ADDR_MASK) == YCR_DCACHE_ADDR_PATTERN) begin
+   end else if (((mem_addr & YCR_DCACHE_ADDR_MASK) == YCR_DCACHE_ADDR_PATTERN) && (cfg_bypass_dcache == 1'b0)) begin
        func_taget_id    = YCR_SEL_PORT2;
    end else if ((mem_addr & YCR_TCM_ADDR_MASK) == YCR_TCM_ADDR_PATTERN) begin
        func_taget_id    = YCR_SEL_PORT3;

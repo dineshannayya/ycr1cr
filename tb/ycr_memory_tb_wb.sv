@@ -151,22 +151,22 @@ endfunction : ycr_write_mem
 // IMEM access
 logic   [YCR_WB_WIDTH-1:0]    imem_ahb_addr;
 logic   [YCR_WB_WIDTH-1:0]    imem_req_ack_stall;
-bit                             imem_req_ack_rnd;
-logic                           imem_req_ack_i;
-logic                           imem_req_ack_nc;
+bit                           imem_req_ack_rnd;
+logic                         imem_req_ack_i;
+logic                         imem_req_ack_nc;
 logic   [YCR_WB_WIDTH-1:0]    imem_hrdata_l;
-logic   [3:0]                   imem_wr_hazard;
+logic   [3:0]                 imem_wr_hazard;
 
 // DMEM access
 logic   [YCR_WB_WIDTH-1:0]    dmem_req_ack_stall;
-bit                             dmem_req_ack_rnd;
-logic                           dmem_req_ack;
-logic                           dmem_req_ack_nc;
+bit                           dmem_req_ack_rnd;
+logic                         dmem_req_ack;
+logic                         dmem_req_ack_nc;
 logic   [YCR_WB_WIDTH-1:0]    dmem_ahb_addr;
-logic   [2:0]                   dmem_ahb_size;
-logic   [3:0]                   dmem_ahb_be;
+logic   [2:0]                 dmem_ahb_size;
+logic   [3:0]                 dmem_ahb_be;
 logic   [YCR_WB_WIDTH-1:0]    dmem_hrdata_l;
-logic   [3:0]                   dmem_wr_hazard;
+logic   [3:0]                 dmem_wr_hazard;
 
 //-------------------------------------------------------------------------------
 // Instruction memory ready
@@ -268,7 +268,6 @@ always @(negedge rst_n, posedge clk) begin
         wbd_dmem_dat_o   = 'x;
 	dmem_bl_cnt      = 10'h1;
 	dmem_ptr         = 0;
-        dmem_hrdata_l    = '0;
         soft_irq_reg   = '0;
 `ifdef YCR_IPIC_EN
         irq_lines_reg  = '0;
@@ -287,28 +286,28 @@ always @(negedge rst_n, posedge clk) begin
             case (wbd_dmem_adr_i)
                   // Reading Soft IRQ value
                YCR_SIM_SOFT_IRQ_ADDR : begin
-                  dmem_hrdata_l    = '0;
-                  dmem_hrdata_l[0] = soft_irq_reg;
+                  wbd_dmem_dat_o    = '0;
+                  wbd_dmem_dat_o[0] = soft_irq_reg;
                end
 `ifdef YCR_IPIC_EN
                   // Reading IRQ Lines values
                YCR_SIM_EXT_IRQ_ADDR : begin
-                  dmem_hrdata_l = '0;
-                  dmem_hrdata_l[YCR_IRQ_LINES_NUM-1:0] <= irq_lines_reg;
+                  wbd_dmem_dat_o = '0;
+                  wbd_dmem_dat_o[YCR_IRQ_LINES_NUM-1:0] <= irq_lines_reg;
                end
 `else // YCR_IPIC_EN
                  // Reading External IRQ value
               YCR_SIM_EXT_IRQ_ADDR : begin
-                 dmem_hrdata_l    = '0;
-                 dmem_hrdata_l[0] = ext_irq_reg;
+                 wbd_dmem_dat_o    = '0;
+                 wbd_dmem_dat_o[0] = ext_irq_reg;
               end
 `endif // YCR_IPIC_EN
              // Regular read operation
              default : begin
                 if(mirage_rangeen & wbd_dmem_adr_i>=mirage_adrlo & wbd_dmem_adr_i<mirage_adrhi)
-                   dmem_hrdata_l = ycr_read_mem(dmem_ptr, wbd_dmem_sel_i, dmem_wr_hazard, wbd_dmem_dat_i, 1'b1);
+                   wbd_dmem_dat_o = ycr_read_mem(dmem_ptr, wbd_dmem_sel_i, dmem_wr_hazard, wbd_dmem_dat_i, 1'b1);
                 else
-                   dmem_hrdata_l = ycr_read_mem(dmem_ptr, wbd_dmem_sel_i, dmem_wr_hazard, wbd_dmem_dat_i, 1'b0);
+                   wbd_dmem_dat_o = ycr_read_mem(dmem_ptr, wbd_dmem_sel_i, dmem_wr_hazard, wbd_dmem_dat_i, 1'b0);
              end
             endcase
 	end
