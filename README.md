@@ -20,8 +20,8 @@ iverilog -g2012 \
 -I ../../tb/ \
 -D YCR1_CFG_RV32IMC_MAX \
 -D RTL \
-../../tb/ycr1_top_tb_wb.sv \
--o ycr1_top_tb_wb.vvp
+../../tb/ycr_top_tb_wb.sv \
+-o ycr_top_tb_wb.vvp
 
 
 ## 3. In Build test directory, keep required number of test file in test_info file and run below command
