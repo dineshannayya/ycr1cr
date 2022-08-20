@@ -29,7 +29,8 @@
 ////    nothing                                                           ////
 ////                                                                      ////
 ////  Author(s):                                                          ////
-////      - Dinesh Annayya, dinesha@opencores.org                         ////
+////     - syntacore, https://github.com/syntacore/scr1                   ////
+////     - Dinesh Annayya, dinesha@opencores.org                          ////
 ////                                                                      ////
 ////  Revision :                                                          ////
 ////     v0:    Jan 2021- Initial version picked from syntacore/scr1      ////
@@ -48,7 +49,7 @@
 //------------------------------------------------------------------------------
 
 // YCR1 core identifiers
-`define YCR_MIMPID             32'h22061200 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
+`define YCR_MIMPID             32'h22081900 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
 `define YCR_MVENDORID          32'h00000000
 `define YCR_NUMCORES           32'h00000001
 

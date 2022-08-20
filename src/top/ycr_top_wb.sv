@@ -29,7 +29,8 @@
 ////    nothing                                                           ////
 ////                                                                      ////
 ////  Authors:                                                            ////
-////      Dinesh Annayya, dinesha@opencores.org                           ////
+////     - syntacore, https://github.com/syntacore/scr1                   ////
+////     - Dinesh Annayya, dinesha@opencores.org                          ////
 ////                                                                      ////
 ////  CPU Memory Map:                                                     ////
 ////            0x0000_0000 to 0x07FF_FFFF (128MB) - ICACHE               ////
@@ -76,12 +77,12 @@
 ////     1.9:   Mar 29, 2022, Dinesh A                                    ////
 ////            To break the timing path, once cycle gap assumed between  ////
 ////            core request to slave ack, following files are modified   ////
-////     	    src/cache/src/core/dcache_top.sv                      ////
-////     	    src/cache/src/core/icache_top.sv                      ////
-////     	    src/core/pipeline/ycr_pipe_ifu.sv                     ////
-////     	    src/top/ycr_dmem_router.sv                            ////
-////     	    src/top/ycr_dmem_wb.sv                                ////
-////     	    src/top/ycr_tcm.sv                                    ////
+////     	    src/cache/src/core/dcache_top.sv                          ////
+////     	    src/cache/src/core/icache_top.sv                          ////
+////     	    src/core/pipeline/ycr_pipe_ifu.sv                         ////
+////     	    src/top/ycr_dmem_router.sv                                ////
+////     	    src/top/ycr_dmem_wb.sv                                    ////
+////     	    src/top/ycr_tcm.sv                                        ////
 ////            Synth and sta script are clean-up                         ////
 ////     2.0:  April 1, 2022, Dinesh A                                    ////
 ////           As sky130 SRAM timining library are not accurate, added    ////

@@ -30,7 +30,8 @@
 ////    nothing                                                           ////
 ////                                                                      ////
 ////  Author(s):                                                          ////
-////      - Dinesh Annayya, dinesha@opencores.org                         ////
+////     - syntacore, https://github.com/syntacore/scr1                   ////
+////     - Dinesh Annayya, dinesha@opencores.org                          ////
 ////                                                                      ////
 ////  Revision :                                                          ////
 ////     v0 - 25th July 2021                                              ////

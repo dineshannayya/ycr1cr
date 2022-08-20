@@ -29,7 +29,8 @@
 ////    nothing                                                           ////
 ////                                                                      ////
 ////  Author(s):                                                          ////
-////      - Dinesh Annayya, dinesha@opencores.org                         ////
+////     - syntacore, https://github.com/syntacore/scr1                   ////
+////     - Dinesh Annayya, dinesha@opencores.org                          ////
 ////                                                                      ////
 ////  Revision :                                                          ////
 ////     v0:    Jan 2021- Initial version picked from syntacore/scr1      ////

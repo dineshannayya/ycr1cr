@@ -46,10 +46,12 @@
 ////    nothing                                                           ////
 ////                                                                      ////
 ////  Author(s):                                                          ////
-////      - Dinesh Annayya, dinesha@opencores.org                         ////
+////     - syntacore, https://github.com/syntacore/scr1                   ////
+////     - Dinesh Annayya, dinesha@opencores.org                          ////
 ////                                                                      ////
 ////  Revision :                                                          ////
-////     0.0:    Jan 2021- Initial version picked from syntacore/scr1     ////
+////     0.0:   Jan 2021- Initial version picked from                     ////
+////            https://github.com/syntacore/scr1                         ////
 ////     0.1:    June 7, 2021, Dinesh A                                   ////
 ////             opentool(iverilog/yosys) related cleanup                 ////
 ////     0.2:    Jan 22, 2022, Dinesh A                                   ////
