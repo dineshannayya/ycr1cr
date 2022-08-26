@@ -60,6 +60,8 @@
 ////            https://github.com/syntacore/scr1                         ////
 ////     v1:    June 7, 2021, Dinesh A                                    ////
 ////             opentool(iverilog/yosys) related cleanup                 ////
+////     v2:   Aug 21, 2022, Dinesh A                                     ////
+////          Logic movement to break combinational loop                  ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -361,9 +363,6 @@ always_comb begin
 `ifdef YCR_TDU_EN
     csr_brkm_req   = 1'b0;
 `endif // YCR_TDU_EN
-`ifdef YCR_IPIC_EN
-    csr2ipic_r_req_o = 1'b0;
-`endif // YCR_IPIC_EN
 
     casez (exu2csr_rw_addr_i)
         // Machine Information Registers (read-only)
@@ -466,7 +465,6 @@ always_comb begin
         YCR_CSR_ADDR_IPIC_IDX,
         YCR_CSR_ADDR_IPIC_ICSR     : begin
             csr_r_data       = ipic2csr_rdata_i;
-            csr2ipic_r_req_o = exu2csr_r_req_i;
         end
 `endif // YCR_IPIC_EN
 
@@ -497,6 +495,32 @@ always_comb begin
         end
     endcase // exu2csr_rw_addr_i
 end
+
+/****************************************************************************************************
+    Due to Combination loop between csr2ipic_r_req_o &  ipic2csr_rdata_i, we have seperated this logic
+*****************************************************************************************************/
+
+`ifdef YCR_IPIC_EN
+always_comb begin
+    csr2ipic_r_req_o = 1'b0;
+
+    casez (exu2csr_rw_addr_i)
+        // IPIC registers
+        YCR_CSR_ADDR_IPIC_CISV,
+        YCR_CSR_ADDR_IPIC_CICSR,
+        YCR_CSR_ADDR_IPIC_IPR,
+        YCR_CSR_ADDR_IPIC_ISVR,
+        YCR_CSR_ADDR_IPIC_EOI,
+        YCR_CSR_ADDR_IPIC_SOI,
+        YCR_CSR_ADDR_IPIC_IDX,
+        YCR_CSR_ADDR_IPIC_ICSR     : begin
+            csr2ipic_r_req_o = exu2csr_r_req_i;
+        end
+    endcase
+end
+
+`endif // YCR_IPIC_EN
+
 
 assign csr2exu_r_data_o = csr_r_data;
 

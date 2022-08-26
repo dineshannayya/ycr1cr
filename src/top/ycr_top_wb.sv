@@ -95,6 +95,8 @@
 ////           Replaced DFFRAM with SRAM Memory                           ////
 ////     2.3:  June 12, 2022, Dinesh A                                    ////
 ////           icache and dcache bypass config added                      ////
+////     2.4:  Aug 20, 2022, Dinesh A                                     ////
+////           Increase total external interrupt from 16 to 32            ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 

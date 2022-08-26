@@ -61,6 +61,8 @@
 ////            https://github.com/syntacore/scr1                         ////
 ////     v1:    June 7, 2021, Dinesh A                                    ////
 ////             opentool(iverilog/yosys) related cleanup                 ////
+////     v2:    Aug 21, 2022, Dinesh A                                    ////
+////            Interrupt support increse from 16 to 32                   ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -627,24 +629,40 @@ assign irq_req_idx         = irr_priority.idx;
 always_comb 
 begin
     casex(irq_req_v)
-	    16'bxxxx_xxxx_xxxx_xxx1 : irq_req_idx = 0;
-	    16'bxxxx_xxxx_xxxx_xx10 : irq_req_idx = 1;
-	    16'bxxxx_xxxx_xxxx_x100 : irq_req_idx = 2;
-	    16'bxxxx_xxxx_xxxx_1000 : irq_req_idx = 3;
-	    16'bxxxx_xxxx_xxx1_0000 : irq_req_idx = 4;
-	    16'bxxxx_xxxx_xx10_0000 : irq_req_idx = 5;
-	    16'bxxxx_xxxx_x100_0000 : irq_req_idx = 6;
-	    16'bxxxx_xxxx_1000_0000 : irq_req_idx = 7;
-	    16'bxxxx_xxx1_0000_0000 : irq_req_idx = 8;
-	    16'bxxxx_xx10_0000_0000 : irq_req_idx = 9;
-	    16'bxxxx_x100_0000_0000 : irq_req_idx = 10;
-	    16'bxxxx_1000_0000_0000 : irq_req_idx = 11;
-	    16'bxxx1_0000_0000_0000 : irq_req_idx = 12;
-	    16'bxx10_0000_0000_0000 : irq_req_idx = 13;
-	    16'bx100_0000_0000_0000 : irq_req_idx = 14;
-	    16'b1000_0000_0000_0000 : irq_req_idx = 15;
-	    16'b0000_0000_0000_0000 : irq_req_idx = 16;
-	    default : irq_req_idx = 16;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxx1 : irq_req_idx = 0;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xx10 : irq_req_idx = 1;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_x100 : irq_req_idx = 2;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_1000 : irq_req_idx = 3;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxx1_0000 : irq_req_idx = 4;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xx10_0000 : irq_req_idx = 5;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_x100_0000 : irq_req_idx = 6;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_1000_0000 : irq_req_idx = 7;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxx1_0000_0000 : irq_req_idx = 8;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xx10_0000_0000 : irq_req_idx = 9;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_x100_0000_0000 : irq_req_idx = 10;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_1000_0000_0000 : irq_req_idx = 11;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxx1_0000_0000_0000 : irq_req_idx = 12;
+	    32'bxxxx_xxxx_xxxx_xxxx_xx10_0000_0000_0000 : irq_req_idx = 13;
+	    32'bxxxx_xxxx_xxxx_xxxx_x100_0000_0000_0000 : irq_req_idx = 14;
+	    32'bxxxx_xxxx_xxxx_xxxx_1000_0000_0000_0000 : irq_req_idx = 15;
+        32'bxxxx_xxxx_xxxx_xxx1_0000_0000_0000_0000 : irq_req_idx = 16;
+        32'bxxxx_xxxx_xxxx_xx10_0000_0000_0000_0000 : irq_req_idx = 17;
+        32'bxxxx_xxxx_xxxx_x100_0000_0000_0000_0000 : irq_req_idx = 18;
+        32'bxxxx_xxxx_xxxx_1000_0000_0000_0000_0000 : irq_req_idx = 19;
+        32'bxxxx_xxxx_xxx1_0000_0000_0000_0000_0000 : irq_req_idx = 20;
+        32'bxxxx_xxxx_xx10_0000_0000_0000_0000_0000 : irq_req_idx = 21;
+        32'bxxxx_xxxx_x100_0000_0000_0000_0000_0000 : irq_req_idx = 22;
+        32'bxxxx_xxxx_1000_0000_0000_0000_0000_0000 : irq_req_idx = 23;
+        32'bxxxx_xxx1_0000_0000_0000_0000_0000_0000 : irq_req_idx = 24;
+        32'bxxxx_xx10_0000_0000_0000_0000_0000_0000 : irq_req_idx = 25;
+        32'bxxxx_x100_0000_0000_0000_0000_0000_0000 : irq_req_idx = 26;
+        32'bxxxx_1000_0000_0000_0000_0000_0000_0000 : irq_req_idx = 27;
+        32'bxxx1_0000_0000_0000_0000_0000_0000_0000 : irq_req_idx = 28;
+        32'bxx10_0000_0000_0000_0000_0000_0000_0000 : irq_req_idx = 29;
+        32'bx100_0000_0000_0000_0000_0000_0000_0000 : irq_req_idx = 30;
+        32'b1000_0000_0000_0000_0000_0000_0000_0000 : irq_req_idx = 31;
+	    32'b0000_0000_0000_0000_0000_0000_0000_0000 : irq_req_idx = 32;
+	    default : irq_req_idx = 32;
     endcase
     irq_req_vd = |irq_req_v;
 end
@@ -658,24 +676,40 @@ assign irq_eoi_req_idx     = isvr_priority_eoi.idx;
 always_comb 
 begin
     casex(ipic_isvr_eoi)
-	    16'bxxxx_xxxx_xxxx_xxx1 : irq_eoi_req_idx = 0;
-	    16'bxxxx_xxxx_xxxx_xx10 : irq_eoi_req_idx = 1;
-	    16'bxxxx_xxxx_xxxx_x100 : irq_eoi_req_idx = 2;
-	    16'bxxxx_xxxx_xxxx_1000 : irq_eoi_req_idx = 3;
-	    16'bxxxx_xxxx_xxx1_0000 : irq_eoi_req_idx = 4;
-	    16'bxxxx_xxxx_xx10_0000 : irq_eoi_req_idx = 5;
-	    16'bxxxx_xxxx_x100_0000 : irq_eoi_req_idx = 6;
-	    16'bxxxx_xxxx_1000_0000 : irq_eoi_req_idx = 7;
-	    16'bxxxx_xxx1_0000_0000 : irq_eoi_req_idx = 8;
-	    16'bxxxx_xx10_0000_0000 : irq_eoi_req_idx = 9;
-	    16'bxxxx_x100_0000_0000 : irq_eoi_req_idx = 10;
-	    16'bxxxx_1000_0000_0000 : irq_eoi_req_idx = 11;
-	    16'bxxx1_0000_0000_0000 : irq_eoi_req_idx = 12;
-	    16'bxx10_0000_0000_0000 : irq_eoi_req_idx = 13;
-	    16'bx100_0000_0000_0000 : irq_eoi_req_idx = 14;
-	    16'b1000_0000_0000_0000 : irq_eoi_req_idx = 15;
-	    16'b0000_0000_0000_0000 : irq_eoi_req_idx = 16;
-	    default : irq_eoi_req_idx = 16;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxx1 : irq_eoi_req_idx = 0;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xx10 : irq_eoi_req_idx = 1;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_x100 : irq_eoi_req_idx = 2;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_1000 : irq_eoi_req_idx = 3;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxx1_0000 : irq_eoi_req_idx = 4;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xx10_0000 : irq_eoi_req_idx = 5;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_x100_0000 : irq_eoi_req_idx = 6;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxxx_1000_0000 : irq_eoi_req_idx = 7;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xxx1_0000_0000 : irq_eoi_req_idx = 8;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_xx10_0000_0000 : irq_eoi_req_idx = 9;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_x100_0000_0000 : irq_eoi_req_idx = 10;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxxx_1000_0000_0000 : irq_eoi_req_idx = 11;
+	    32'bxxxx_xxxx_xxxx_xxxx_xxx1_0000_0000_0000 : irq_eoi_req_idx = 12;
+	    32'bxxxx_xxxx_xxxx_xxxx_xx10_0000_0000_0000 : irq_eoi_req_idx = 13;
+	    32'bxxxx_xxxx_xxxx_xxxx_x100_0000_0000_0000 : irq_eoi_req_idx = 14;
+	    32'bxxxx_xxxx_xxxx_xxxx_1000_0000_0000_0000 : irq_eoi_req_idx = 15;
+        32'bxxxx_xxxx_xxxx_xxx1_0000_0000_0000_0000 : irq_eoi_req_idx = 16;
+        32'bxxxx_xxxx_xxxx_xx10_0000_0000_0000_0000 : irq_eoi_req_idx = 17;
+        32'bxxxx_xxxx_xxxx_x100_0000_0000_0000_0000 : irq_eoi_req_idx = 18;
+        32'bxxxx_xxxx_xxxx_1000_0000_0000_0000_0000 : irq_eoi_req_idx = 19;
+        32'bxxxx_xxxx_xxx1_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 20;
+        32'bxxxx_xxxx_xx10_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 21;
+        32'bxxxx_xxxx_x100_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 22;
+        32'bxxxx_xxxx_1000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 23;
+        32'bxxxx_xxx1_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 24;
+        32'bxxxx_xx10_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 25;
+        32'bxxxx_x100_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 26;
+        32'bxxxx_1000_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 27;
+        32'bxxx1_0000_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 28;
+        32'bxx10_0000_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 29;
+        32'bx100_0000_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 30;
+        32'b1000_0000_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 31;
+	    32'b0000_0000_0000_0000_0000_0000_0000_0000 : irq_eoi_req_idx = 32;
+	    default : irq_eoi_req_idx = 32;
     endcase
     irq_eoi_req_vd = |ipic_isvr_eoi;
 end

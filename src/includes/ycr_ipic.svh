@@ -36,6 +36,8 @@
 ////     v0:    Jan 2021- Initial version picked from syntacore/scr1      ////
 ////     v1:    June 7, 2021, Dinesh A                                    ////
 ////             opentool(iverilog/yosys) related cleanup                 ////
+////     v2:    Aug 20, 2022, Dinesh A                                    ////
+///             changed YCR_IRQ_VECT_NUM value from 16 to 32              ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +51,7 @@
 //-------------------------------------------------------------------------------
 // Parameters declaration
 //-------------------------------------------------------------------------------
-parameter                                   YCR_IRQ_VECT_NUM       = 16;   // must be power of 2 in the current implementation
+parameter                                   YCR_IRQ_VECT_NUM       = 32;   // must be power of 2 in the current implementation
 parameter                                   YCR_IRQ_VECT_WIDTH     = $clog2(YCR_IRQ_VECT_NUM+1);
 parameter                                   YCR_IRQ_LINES_NUM      = YCR_IRQ_VECT_NUM;
 parameter                                   YCR_IRQ_LINES_WIDTH    = $clog2(YCR_IRQ_LINES_NUM);
