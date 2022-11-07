@@ -514,7 +514,17 @@ ycr_top_wb i_top (
     .wbd_dmem_dat_i         (wbd_dmem_dat_i         ),
     .wbd_dmem_ack_i         (wbd_dmem_ack_i         ),
     .wbd_dmem_lack_i        (wbd_dmem_lack_i        ),
-    .wbd_dmem_err_i         (wbd_dmem_err_i         )
+    .wbd_dmem_err_i         (wbd_dmem_err_i         ),
+
+
+    .aes_dmem_req_ack       ( 1'b0),
+    .aes_dmem_req           (),
+    .aes_dmem_cmd           (),
+    .aes_dmem_width         (),
+    .aes_dmem_addr          (),
+    .aes_dmem_wdata         (),
+    .aes_dmem_rdata         ('h0),
+    .aes_dmem_resp          ('h0)
 
 );
 

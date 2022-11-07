@@ -49,7 +49,7 @@
 //------------------------------------------------------------------------------
 
 // YCR1 core identifiers
-`define YCR_MIMPID             32'h22081900 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
+`define YCR_MIMPID             32'h22110700 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
 `define YCR_MVENDORID          32'h00000000
 `define YCR_NUMCORES           32'h00000001
 
@@ -228,7 +228,10 @@ parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TCM_ADDR_MASK          = 'hFFFF0000; 
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TCM_ADDR_PATTERN       = 'h0C480000;       // TCM address match pattern
 
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TIMER_ADDR_MASK        = 'hFFFFFFE0;       // Timer mask
-parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TIMER_ADDR_PATTERN     = 'h0C490000;       // Timer address match pattern
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TIMER_ADDR_PATTERN     = 'h0C490000;       // Timer address match pattern - 0x0C490000 - 0x0C49001F
+
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_AES_ADDR_MASK          = 'hFFFFFF80;       // AES MASK
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_AES_ADDR_PATTERN       = 'h0C490080;       // AES Address Match Pattern    -0x0C490080 - 0x0C4900FF
 
 // Device build ID
  `define YCR_ARCH_BUILD_ID             `YCR_MIMPID

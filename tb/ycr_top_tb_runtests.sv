@@ -76,7 +76,7 @@ end
 	  end
  end
  ***/
- 
+/** 
  always@(posedge `RISC_CORE.clk) begin
 	 if(rst_init) begin
 	     instr_count = 0;
@@ -85,7 +85,7 @@ end
              instr_count = instr_count+1;
 	  end
  end
-
+**/
 `ifdef GL
 //  wire [31:0] func_return_val = {i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][31],
 //	                         i_top.i_core_top_0.i_pipe_top.i_pipe_mprf.mprf_int[10][30],

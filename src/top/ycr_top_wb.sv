@@ -97,6 +97,8 @@
 ////           icache and dcache bypass config added                      ////
 ////     2.4:  Aug 20, 2022, Dinesh A                                     ////
 ////           Increase total external interrupt from 16 to 32            ////
+////     2.5:  Nov 7, 2022, Dinesh A                                      ////
+////           Added Interface to integrate AES core                      ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -260,7 +262,17 @@ module ycr_top_wb (
     input   logic   [YCR_WB_WIDTH-1:0]   wbd_dmem_dat_i, // data input
     input   logic                        wbd_dmem_ack_i, // acknowlegement
     input   logic                        wbd_dmem_lack_i, // acknowlegement
-    input   logic                        wbd_dmem_err_i  // error
+    input   logic                        wbd_dmem_err_i,  // error
+
+    // Data memory interface from router to WB bridge
+    input    logic                       aes_dmem_req_ack          ,
+    output   logic                       aes_dmem_req              ,
+    output   logic                       aes_dmem_cmd              ,
+    output   logic [1:0]                 aes_dmem_width            ,
+    output   logic [6:0]                 aes_dmem_addr             ,
+    output   logic [`YCR_DMEM_DWIDTH-1:0]aes_dmem_wdata            ,
+    input    logic [`YCR_DMEM_DWIDTH-1:0]aes_dmem_rdata            ,
+    input    logic [1:0]                 aes_dmem_resp             
 );
 
 //-------------------------------------------------------------------------------
@@ -451,9 +463,17 @@ ycr_iconnect u_connect (
           .sram0_clk1                   (sram0_clk1                   ),
           .sram0_csb1                   (sram0_csb1                   ),
           .sram0_addr1                  (sram0_addr1                  ),
-          .sram0_dout1                  (sram0_dout1                  )
+          .sram0_dout1                  (sram0_dout1                  ),
  
 `endif
+          .aes_dmem_req_ack             (aes_dmem_req_ack             ),
+          .aes_dmem_req                 (aes_dmem_req                 ),
+          .aes_dmem_cmd                 (aes_dmem_cmd                 ),
+          .aes_dmem_width               (aes_dmem_width               ),
+          .aes_dmem_addr                (aes_dmem_addr                ),
+          .aes_dmem_wdata               (aes_dmem_wdata               ),
+          .aes_dmem_rdata               (aes_dmem_rdata               ),
+          .aes_dmem_resp                (aes_dmem_resp                )
 );
 
 //----------------------------------------------------------------------
