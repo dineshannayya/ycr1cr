@@ -368,6 +368,13 @@ end
 // Core instance
 //-------------------------------------------------------------------------------
 ycr_top_wb i_top (
+
+    // RISCV Clock Skew Control
+    .cfg_ccska_riscv_intf   (4'h0                   ),
+    .cfg_ccska_riscv_icon   (4'h0                   ),
+    .cfg_ccska_riscv_core0  (4'h0                   ),
+    .core_clk_int           (clk                    ),
+
     // Reset
     .pwrup_rst_n            (rst_n                  ),
     .rst_n                  (rst_n                  ),
@@ -384,7 +391,6 @@ ycr_top_wb i_top (
 `endif // YCR_DBG_EN
 
     // Clock
-    .core_clk               (clk                    ),
     .rtc_clk                (rtc_clk                ),
     .riscv_debug            (                       ),
 
@@ -524,7 +530,16 @@ ycr_top_wb i_top (
     .aes_dmem_addr          (),
     .aes_dmem_wdata         (),
     .aes_dmem_rdata         ('h0),
-    .aes_dmem_resp          ('h0)
+    .aes_dmem_resp          ('h0),
+
+    .fpu_dmem_req_ack       ( 1'b0),
+    .fpu_dmem_req           (),
+    .fpu_dmem_cmd           (),
+    .fpu_dmem_width         (),
+    .fpu_dmem_addr          (),
+    .fpu_dmem_wdata         (),
+    .fpu_dmem_rdata         ('h0),
+    .fpu_dmem_resp          ('h0)
 
 );
 

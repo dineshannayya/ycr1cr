@@ -46,7 +46,9 @@
 module ycr_dmem_router
 #(
     parameter YCR_PORT1_ADDR_MASK      = `YCR_DMEM_AWIDTH'hFFFF0000,
-    parameter YCR_PORT1_ADDR_PATTERN   = `YCR_DMEM_AWIDTH'h00010000
+    parameter YCR_PORT1_ADDR_PATTERN   = `YCR_DMEM_AWIDTH'h00010000,
+    parameter YCR_PORT2_ADDR_MASK      = `YCR_DMEM_AWIDTH'hFFFF0000,
+    parameter YCR_PORT2_ADDR_PATTERN   = `YCR_DMEM_AWIDTH'h00010000
 )
 (
     // Control signals
@@ -81,7 +83,17 @@ module ycr_dmem_router
     output  logic [`YCR_DMEM_AWIDTH-1:0]    port1_addr,
     output  logic [`YCR_DMEM_DWIDTH-1:0]    port1_wdata,
     input   logic [`YCR_DMEM_DWIDTH-1:0]    port1_rdata,
-    input   logic [1:0]                     port1_resp
+    input   logic [1:0]                     port1_resp,
+
+    // PORT2 interface
+    input   logic                           port2_req_ack,
+    output  logic                           port2_req,
+    output  logic                           port2_cmd,
+    output  logic [1:0]                     port2_width,
+    output  logic [`YCR_DMEM_AWIDTH-1:0]    port2_addr,
+    output  logic [`YCR_DMEM_DWIDTH-1:0]    port2_wdata,
+    input   logic [`YCR_DMEM_DWIDTH-1:0]    port2_rdata,
+    input   logic [1:0]                     port2_resp
 
 );
 
@@ -118,6 +130,8 @@ always_comb begin
     port_sel    = YCR_SEL_PORT0;
     if ((dmem_addr & YCR_PORT1_ADDR_MASK) == YCR_PORT1_ADDR_PATTERN) begin
         port_sel    = YCR_SEL_PORT1;
+    end else if ((dmem_addr & YCR_PORT2_ADDR_MASK) == YCR_PORT2_ADDR_PATTERN) begin
+        port_sel    = YCR_SEL_PORT2;
     end
 end
 
@@ -161,7 +175,8 @@ always_comb begin
         case (port_sel)
             YCR_SEL_PORT0  : sel_req_ack   = port0_req_ack;
             YCR_SEL_PORT1  : sel_req_ack   = port1_req_ack;
-            default         : sel_req_ack   = 1'b0;
+            YCR_SEL_PORT2  : sel_req_ack   = port2_req_ack;
+            default        : sel_req_ack   = 1'b0;
         endcase
     end else begin
         sel_req_ack = 1'b0;
@@ -177,6 +192,10 @@ always_comb begin
         YCR_SEL_PORT1  : begin
             sel_rdata   = port1_rdata;
             sel_resp    = port1_resp;
+        end
+        YCR_SEL_PORT2  : begin
+            sel_rdata   = port2_rdata;
+            sel_resp    = port2_resp;
         end
         default         : begin
             sel_rdata   = '0;
@@ -254,6 +273,36 @@ assign port1_addr   = dmem_addr ;
 assign port1_wdata  = dmem_wdata;
 `endif // YCR_XPROP_EN
 
+//-------------------------------------------------------------------------------
+// Interface to PORT2
+//-------------------------------------------------------------------------------
+always_comb begin
+    port2_req = 1'b0;
+    case (fsm)
+        YCR_FSM_ADDR : begin
+            port2_req = dmem_req & (port_sel == YCR_SEL_PORT2);
+        end
+        YCR_FSM_DATA : begin
+            if (sel_resp == YCR_MEM_RESP_RDY_OK) begin
+                port2_req = dmem_req & (port_sel == YCR_SEL_PORT2);
+            end
+        end
+        default : begin
+        end
+    endcase
+end
+
+`ifdef YCR_XPROP_EN
+assign port2_cmd    = (port_sel == YCR_SEL_PORT2) ? dmem_cmd   : YCR_MEM_CMD_ERROR;
+assign port2_width  = (port_sel == YCR_SEL_PORT2) ? dmem_width : YCR_MEM_WIDTH_ERROR;
+assign port2_addr   = (port_sel == YCR_SEL_PORT2) ? dmem_addr  : 'x;
+assign port2_wdata  = (port_sel == YCR_SEL_PORT2) ? dmem_wdata : 'x;
+`else // YCR_XPROP_EN
+assign port2_cmd    = dmem_cmd  ;
+assign port2_width  = dmem_width;
+assign port2_addr   = dmem_addr ;
+assign port2_wdata  = dmem_wdata;
+`endif // YCR_XPROP_EN
 
 `ifdef YCR_TRGT_SIMULATION
 //-------------------------------------------------------------------------------

@@ -578,7 +578,7 @@ begin
        func_taget_id    = YCR_SEL_PORT2;
    end else if ((mem_addr & YCR_TCM_ADDR_MASK) == YCR_TCM_ADDR_PATTERN) begin
        func_taget_id    = YCR_SEL_PORT3;
-   end else if ((mem_addr & YCR_TIMER_ADDR_MASK) == YCR_TIMER_ADDR_PATTERN) begin
+   end else if ((mem_addr & YCR_LOCAL_ADDR_MASK) == YCR_LOCAL_ADDR_PATTERN) begin
        func_taget_id    = YCR_SEL_PORT4;
    end
 end

@@ -54,12 +54,15 @@ module ycr_intf (
     input logic                             vssd1                     , // User area 1 digital ground
 `endif
 
-    input  logic   [3:0]                    cfg_cska_riscv            ,
+    input  logic   [3:0]                    cfg_wcska                 ,
     input  logic                            wbd_clk_int               ,
-    output logic                            wbd_clk_riscv             ,
+    output logic                            wbd_clk_skew              ,
     // Control
     input   logic                           pwrup_rst_n               , // Power-Up Reset
     // From clock gen
+    input   logic [3:0]                     cfg_ccska                 ,
+    input   logic                           core_clk_int              ,
+    output  logic                           core_clk_skew             ,
     input   logic                           core_clk                  , // Core clock
     input   logic                           cpu_intf_rst_n            , // CPU interface reset
 
@@ -112,6 +115,7 @@ module ycr_intf (
 
     // Data Memory Interface
     output  logic                           wbd_dmem_stb_o            , // strobe/request
+    output  logic                           wbd_dmem_cyc_o            , // strobe/request
     output  logic   [YCR_WB_WIDTH-1:0]      wbd_dmem_adr_o            , // address
     output  logic                           wbd_dmem_we_o             , // write
     output  logic   [YCR_WB_WIDTH-1:0]      wbd_dmem_dat_o            , // data output
@@ -260,16 +264,35 @@ logic                             dcache_mem_csb1_int       ; // CS#
 logic  [8:0]                      dcache_mem_addr1_int      ; // Address
 
 
-// riscv clock skew control
-clk_skew_adjust u_skew_riscv
+
+assign wbd_dmem_cyc_o  = wbd_dmem_stb_o;
+
+//--------------------------------------------
+// RISCV clock skew control
+//--------------------------------------------
+clk_skew_adjust u_skew_core_clk
        (
 `ifdef USE_POWER_PINS
      .vccd1                   (vccd1                   ),// User area 1 1.8V supply
      .vssd1                   (vssd1                   ),// User area 1 digital ground
 `endif
-	    .clk_in           (wbd_clk_int             ), 
-	    .sel              (cfg_cska_riscv          ), 
-	    .clk_out          (wbd_clk_riscv           ) 
+	    .clk_in               (core_clk_int            ), 
+	    .sel                  (cfg_ccska               ), 
+	    .clk_out              (core_clk_skew           ) 
+       );
+
+//--------------------------------------------
+// WB clock skew control
+//--------------------------------------------
+clk_skew_adjust u_skew_wb_clk
+       (
+`ifdef USE_POWER_PINS
+     .vccd1                   (vccd1                   ),// User area 1 1.8V supply
+     .vssd1                   (vssd1                   ),// User area 1 digital ground
+`endif
+	    .clk_in               (wbd_clk_int             ), 
+	    .sel                  (cfg_wcska               ), 
+	    .clk_out              (wbd_clk_skew            ) 
        );
 //---------------------------------------------------------------------------------
 // To avoid core level power hook up, we have brought this signal inside, to

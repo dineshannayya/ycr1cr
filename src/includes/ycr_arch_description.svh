@@ -227,11 +227,18 @@ parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_DCACHE_ADDR_PATTERN    = 'h08000000; 
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TCM_ADDR_MASK          = 'hFFFF0000;       // TCM mask and size; size in bytes is two's complement of the mask value
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TCM_ADDR_PATTERN       = 'h0C480000;       // TCM address match pattern
 
+
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_LOCAL_ADDR_MASK        = 'hFFFF0000;       // RISC LOCAL Address Map
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_LOCAL_ADDR_PATTERN     = 'h0C490000;       // pattern - 0x0C490000 - 0x0C49FFFF
+
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TIMER_ADDR_MASK        = 'hFFFFFFE0;       // Timer mask
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_TIMER_ADDR_PATTERN     = 'h0C490000;       // Timer address match pattern - 0x0C490000 - 0x0C49001F
 
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_AES_ADDR_MASK          = 'hFFFFFF80;       // AES MASK
 parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_AES_ADDR_PATTERN       = 'h0C490080;       // AES Address Match Pattern    -0x0C490080 - 0x0C4900FF
+
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_FPU_ADDR_MASK          = 'hFFFFFF80;       // FPU MASK
+parameter bit [`YCR_DMEM_AWIDTH-1:0]   YCR_FPU_ADDR_PATTERN       = 'h0C490100;       // FPU Address Match Pattern    -0x0C490100 - 0x0C49017F
 
 // Device build ID
  `define YCR_ARCH_BUILD_ID             `YCR_MIMPID

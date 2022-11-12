@@ -35,10 +35,13 @@
 ////                                                                      ////
 ////  Revision :                                                          ////
 ////     v0 - 25th July 2021                                              ////
-////              Breaking two's completement into two stage for          ////
+////              Breaking two's complement into two stage for            ////
 ////              timing reason, When all lower 32 bit zero and           ////
 ////              it's complement will be '1', this will cause            ////
 ////              increment in higer bits                                 ////
+////     v1 - 11 Nov 2022                                                 ////
+////             Added addition one cycle pipe line to break two's        ////
+////             complements for input data                               ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 module ycr_pipe_mul (
@@ -53,10 +56,11 @@ module ycr_pipe_mul (
 	input   logic        data_done     // Result processing complete indication
     );
 
-parameter WAIT_CMD      = 2'b00; // Accept command and Do Signed to unsigned
-parameter WAIT_COMP     = 2'b01; // Wait for COMPUTATION
-parameter WAIT_DONE     = 2'b10; // Do Signed to Unsigned conversion 
-parameter WAIT_EXIT     = 2'b11; // Wait for Data Completion
+parameter WAIT_CMD      = 3'b000; // Accept command and Do Signed to unsigned
+parameter WAIT_NEG_CHECK= 3'b001; // Wait for Negative Input check
+parameter WAIT_COMP     = 3'b010; // Wait for COMPUTATION
+parameter WAIT_DONE     = 3'b011; // Do Signed to Unsigned conversion 
+parameter WAIT_EXIT     = 3'b100; // Wait for Data Completion
 
 // wires
 logic [35:0] tmp_mul1;
@@ -66,7 +70,7 @@ logic [31:0] src1,src2; // Unsigned number
 // real registers
 logic [2:0]  cycle,next_cycle;
 logic [63:0] mul_result,mul_next;
-logic [1:0]   state, next_state;
+logic [2:0]   state, next_state;
 logic  mul_rdy_i;
 logic  mul_32b_zero_b;
 
@@ -94,10 +98,13 @@ begin
 
      mul_rdy_o    <= mul_rdy_i;
      if(data_valid && state== WAIT_CMD ) begin
-        src1   <= (Din1[32] == 1'b1) ? (32'hFFFF_FFFF ^ Din1[31:0])+1 : Din1[31:0];
-        src2   <= (Din2[32] == 1'b1) ? (32'hFFFF_FFFF ^ Din2[31:0])+1 : Din2[31:0];
+        src1   <= Din1[31:0];
+        src2   <= Din2[31:0];
+     end else if(state== WAIT_NEG_CHECK ) begin
+        src1   <= (Din1[32] == 1'b1) ? (32'hFFFF_FFFF ^ src1[31:0])+1 : src1[31:0];
+        src2   <= (Din2[32] == 1'b1) ? (32'hFFFF_FFFF ^ src2[31:0])+1 : src2[31:0];
      end else begin
-	src2   <= src2 << 4;
+	    src2   <= src2 << 4;
      end
      if(state== WAIT_DONE ) begin
 	// If Number is negative, then do 2's complement
@@ -123,8 +130,15 @@ begin
      WAIT_CMD: if(data_valid)  begin // Start only on active High Edge
 	     mul_next   = 0;
 	     next_cycle = 0;
-	     next_state = WAIT_COMP;
+	     next_state = WAIT_NEG_CHECK;
 	 end
+     // One Cycle for Negative Input check
+     // Added to break timing violation
+     WAIT_NEG_CHECK: begin
+	     mul_next   = 0;
+	     next_cycle = 0;
+	     next_state = WAIT_COMP;
+     end 
      // WAIT for Computation
      WAIT_COMP:  
 	begin
