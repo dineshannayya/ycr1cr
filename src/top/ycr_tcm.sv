@@ -54,6 +54,7 @@ module ycr_tcm
 (
     // Control signals
     input   logic                           clk,
+    input   logic                           clk_src,
     input   logic                           rst_n,
 
 `ifndef YCR_TCM_MEM
@@ -204,12 +205,12 @@ always_ff @(posedge clk, negedge rst_n) begin
     end
 end
 // connect the TCM memory to SRAM-0
-assign sram0_clk1 = clk;
+assign sram0_clk1 = clk_src;
 assign sram0_csb1 =!(imem_req & dmem_req_ack & imem_addr[11] == 1'b0);
 assign sram0_addr1 = imem_addr[10:2];
 
 // connect the TCM memory to SRAM-1
-assign sram1_clk1 = clk;
+assign sram1_clk1 = clk_src;
 assign sram1_csb1 =!(imem_req & dmem_req_ack & imem_addr[11] == 1'b1);
 assign sram1_addr1 = imem_addr[10:2];
 
@@ -217,7 +218,7 @@ assign sram1_addr1 = imem_addr[10:2];
 assign imem_rdata_int  = (imem_sram_sel == 1'b0) ?  sram0_dout1: sram1_dout1;
 
 // SRAM-0 Port 0 Control Generation
-assign sram0_clk0 = clk;
+assign sram0_clk0 = clk_src;
 assign sram0_csb0   = !(dmem_req & dmem_req_ack & (dmem_addr[11] == 1'b0) & ((dmem_cmd == YCR_MEM_CMD_RD) | (dmem_cmd == YCR_MEM_CMD_WR)));
 assign sram0_web0   = !(dmem_req & dmem_req_ack & (dmem_cmd == YCR_MEM_CMD_WR));
 assign sram0_addr0  = dmem_addr[10:2];
@@ -225,7 +226,7 @@ assign sram0_wmask0 =  dmem_byteen;
 assign sram0_din0   =  dmem_writedata;
 
 // SRAM-1 Port 0 Control Generation
-assign sram1_clk0 = clk;
+assign sram1_clk0 = clk_src;
 assign sram1_csb0   = !(dmem_req & dmem_req_ack & (dmem_addr[11] == 1'b1) & ((dmem_cmd == YCR_MEM_CMD_RD) | (dmem_cmd == YCR_MEM_CMD_WR)));
 assign sram1_web0   = !(dmem_req & dmem_req_ack & (dmem_cmd == YCR_MEM_CMD_WR));
 assign sram1_addr0  = dmem_addr[10:2];

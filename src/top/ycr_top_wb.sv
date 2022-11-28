@@ -129,7 +129,7 @@ module ycr_top_wb (
     input  logic   [3:0]                      cfg_ccska_riscv_intf,
     input  logic   [3:0]                      cfg_ccska_riscv_icon,
     input  logic   [3:0]                      cfg_ccska_riscv_core0,
-    input  logic                              core_clk_int,
+    input  logic   [5:0]                      core_clk_int,
 
     // Control
     input   logic                             pwrup_rst_n,            // Power-Up Reset
@@ -395,7 +395,7 @@ ycr_iconnect u_connect (
 
           // Core clock skew control
           .cfg_ccska                    (cfg_ccska_riscv_icon         ),
-          .core_clk_int                 (core_clk_int                 ),
+          .core_clk_int                 (core_clk_int[1]              ),
           .core_clk_skew                (core_clk_icon_skew           ),
           .core_clk                     (core_clk_icon_skew           ), // Core clock
 
@@ -523,7 +523,7 @@ ycr_intf u_intf(
 
      // Core clock skew control
     .cfg_ccska                (cfg_ccska_riscv_intf      ),
-    .core_clk_int             (core_clk_int              ),
+    .core_clk_int             (core_clk_int[0]              ),
     .core_clk_skew            (core_clk_intf_skew        ),
     .core_clk                 (core_clk_intf_skew        ), // Core clock
 
@@ -674,7 +674,7 @@ ycr_core_top i_core_top_0 (
           .cpu_rst_n                    (cpu_core_rst_n               ),
           // Core clock skew control
           .cfg_ccska                    (cfg_ccska_riscv_core0        ),
-          .core_clk_int                 (core_clk_int                 ),
+          .core_clk_int                 (core_clk_int[2]              ),
           .core_clk_skew                (core_clk_core0_skew          ),
           .clk                          (core_clk_core0_skew          ),
 
