@@ -76,6 +76,7 @@ module ycr_iconnect (
     input   logic                        cfg_bypass_dcache,  // bypass dchance
 
     // CORE-0
+    output   logic                          core0_clk                 ,
     input    logic   [48:0]                 core0_debug               ,
     output   logic     [1:0]                core0_uid                 ,
     output   logic [63:0]                   core0_timer_val           , // Machine timer value
@@ -139,6 +140,7 @@ module ycr_iconnect (
     input    logic [1:0]                    core_dmem_resp            ,
 
     // AES DMEM I/F
+    output   logic                          cpu_clk_aes               ,
     input    logic                          aes_dmem_req_ack          ,
     output   logic                          aes_dmem_req              ,
     output   logic                          aes_dmem_cmd              ,
@@ -149,6 +151,7 @@ module ycr_iconnect (
     input    logic [1:0]                    aes_dmem_resp             ,
 
     // FPU DMEM I/F
+    output   logic                          cpu_clk_fpu               ,
     input    logic                          fpu_dmem_req_ack          ,
     output   logic                          fpu_dmem_req              ,
     output   logic                          fpu_dmem_cmd              ,
@@ -279,6 +282,13 @@ logic   [31:0]                    sram1_din0_int       ; // Write Data
 // SRAM-0 PORT-1
 logic                             sram1_csb1_int       ; // CS#
 logic  [8:0]                      sram1_addr1_int      ; // Address
+
+//---------------------------------------------------------------------------------
+// Providing cpu clock feed through iconnect for better physical routing
+//---------------------------------------------------------------------------------
+assign core0_clk   = core_clk_int;
+assign cpu_clk_fpu = core_clk_int;
+assign cpu_clk_aes = core_clk_int;
 
 //---------------------------------------------------------------------------------
 // To improve the physical routing irq signal are buffer inside the block

@@ -129,7 +129,7 @@ module ycr_top_wb (
     input  logic   [3:0]                      cfg_ccska_riscv_intf,
     input  logic   [3:0]                      cfg_ccska_riscv_icon,
     input  logic   [3:0]                      cfg_ccska_riscv_core0,
-    input  logic   [5:0]                      core_clk_int,
+    input  logic   [1:0]                      core_clk_int,
 
     // Control
     input   logic                             pwrup_rst_n,            // Power-Up Reset
@@ -198,6 +198,7 @@ module ycr_top_wb (
 
    `ifdef YCR_ICACHE_EN
    // Wishbone ICACHE I/F
+
    output logic                          wb_icache_stb_o, // strobe/request
    output logic   [YCR_WB_WIDTH-1:0]     wb_icache_adr_o, // address
    output logic                          wb_icache_we_o,  // write
@@ -272,6 +273,7 @@ module ycr_top_wb (
     input   logic                        wbd_dmem_err_i,  // error
 
     // AES DMEM I/F
+    output   logic                       cpu_clk_aes               , 
     input    logic                       aes_dmem_req_ack          ,
     output   logic                       aes_dmem_req              ,
     output   logic                       aes_dmem_cmd              ,
@@ -282,6 +284,7 @@ module ycr_top_wb (
     input    logic [1:0]                 aes_dmem_resp             ,
 
     // FPU DMEM I/F
+    output   logic                       cpu_clk_fpu               ,
     input    logic                       fpu_dmem_req_ack          ,
     output   logic                       fpu_dmem_req              ,
     output   logic                       fpu_dmem_cmd              ,
@@ -311,6 +314,7 @@ logic [`YCR_NUMCORES-1:0]                           cpu_core_rst_n_sync;        
 //----------------------------------------------------------------
 // CORE-0 Specific Signals
 // ---------------------------------------------------------------
+logic                                              core0_clk;
 logic [48:0]                                       core0_debug;
 logic [1:0]                                        core0_uid;
 logic                                              core0_timer_irq;
@@ -376,12 +380,12 @@ logic [1:0]                                        core_dcache_resp;
 
 logic [3:0]                                        core_clk_out;
 
-
 logic                                              cfg_dcache_force_flush;
 
 logic                                              core_clk_intf_skew;
 logic                                              core_clk_icon_skew;
 logic                                              core_clk_core0_skew;
+
 //-------------------------------------------------------------------------------
 // YCR Intf instance
 //-------------------------------------------------------------------------------
@@ -411,12 +415,14 @@ ycr_iconnect u_connect (
           .core_irq_soft_i              (soft_irq                     ),
 
     // CORE-0
+          .core0_clk                    (core0_clk                    ),
           .core0_debug                  (core0_debug                  ),
           .core0_uid                    (core0_uid                    ),
           .core0_timer_val              (core0_timer_val              ), // Machine timer value
           .core0_timer_irq              (core0_timer_irq              ), // Machine timer value
           .core0_irq_lines              (core0_irq_lines              ),
           .core0_irq_soft               (core0_soft_irq               ),
+
     // Instruction Memory Interface
           .core0_imem_req_ack           (core0_imem_req_ack           ), // IMEM request acknowledge
           .core0_imem_req               (core0_imem_req               ), // IMEM request
@@ -492,6 +498,7 @@ ycr_iconnect u_connect (
           .sram0_dout1                  (sram0_dout1                  ),
  
 `endif
+          .cpu_clk_aes                  (cpu_clk_aes                  ),
           .aes_dmem_req_ack             (aes_dmem_req_ack             ),
           .aes_dmem_req                 (aes_dmem_req                 ),
           .aes_dmem_cmd                 (aes_dmem_cmd                 ),
@@ -501,6 +508,7 @@ ycr_iconnect u_connect (
           .aes_dmem_rdata               (aes_dmem_rdata               ),
           .aes_dmem_resp                (aes_dmem_resp                ),
 
+          .cpu_clk_fpu                  (cpu_clk_fpu                  ),
           .fpu_dmem_req_ack             (fpu_dmem_req_ack             ),
           .fpu_dmem_req                 (fpu_dmem_req                 ),
           .fpu_dmem_cmd                 (fpu_dmem_cmd                 ),
@@ -597,7 +605,7 @@ ycr_intf u_intf(
 
    `ifdef YCR_ICACHE_EN
    // Wishbone ICACHE I/F
-   .wb_icache_cyc_o           (wb_icache_cyc_o            ), // strobe/request
+   .wb_icache_cyc_o           (                           ), // strobe/request
    .wb_icache_stb_o           (wb_icache_stb_o            ), // strobe/request
    .wb_icache_adr_o           (wb_icache_adr_o            ), // address
    .wb_icache_we_o            (wb_icache_we_o             ), // write
@@ -628,7 +636,7 @@ ycr_intf u_intf(
 
    `ifdef YCR_DCACHE_EN
    // Wishbone ICACHE I/F
-   .wb_dcache_cyc_o           (wb_dcache_cyc_o            ), // strobe/request
+   .wb_dcache_cyc_o           (                           ), // strobe/request
    .wb_dcache_stb_o           (wb_dcache_stb_o            ), // strobe/request
    .wb_dcache_adr_o           (wb_dcache_adr_o            ), // address
    .wb_dcache_we_o            (wb_dcache_we_o             ), // write
@@ -674,7 +682,7 @@ ycr_core_top i_core_top_0 (
           .cpu_rst_n                    (cpu_core_rst_n               ),
           // Core clock skew control
           .cfg_ccska                    (cfg_ccska_riscv_core0        ),
-          .core_clk_int                 (core_clk_int[2]              ),
+          .core_clk_int                 (core0_clk                    ),
           .core_clk_skew                (core_clk_core0_skew          ),
           .clk                          (core_clk_core0_skew          ),
 
