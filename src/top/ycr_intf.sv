@@ -57,6 +57,8 @@ module ycr_intf (
     input  logic   [3:0]                    cfg_wcska                 ,
     input  logic                            wbd_clk_int               ,
     output logic                            wbd_clk_skew              ,
+
+
     // Control
     input   logic                           pwrup_rst_n               , // Power-Up Reset
     // From clock gen
@@ -317,7 +319,6 @@ ycr_reset_sync_cell #(
     .rst_n_in       (cpu_intf_rst_n       ),
     .rst_n_out      (cpu_intf_rst_n_sync  )
 );
-
 
 
 `ifdef YCR_ICACHE_EN

@@ -199,7 +199,7 @@ logic [MTRIG_NUM-1:0]                           csr_tdata2_ff [YCR_TDU_DATA_W-1:
 // Read logic
 //------------------------------------------------------------------------------
 
-assign tdu2csr_resp_o = csr2tdu_req_i ? YCR_CSR_RESP_OK : YCR_CSR_RESP_ER;
+assign tdu2csr_resp_o =type_ycr_csr_resp_e'( csr2tdu_req_i ? YCR_CSR_RESP_OK : YCR_CSR_RESP_ER);
 integer i;
 always_comb begin
     i = 0; // yosys latch warning fix

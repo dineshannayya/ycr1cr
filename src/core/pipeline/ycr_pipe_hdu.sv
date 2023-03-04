@@ -316,22 +316,22 @@ always_comb begin
     end else begin
         case (dbg_state)
             YCR_HDU_DBGSTATE_RESET: begin
-                dbg_state_next = ~pipe2hdu_init_pc_i ? YCR_HDU_DBGSTATE_RESET
-                               : dm_dhalt_req        ? YCR_HDU_DBGSTATE_DHALTED
-                                                     : YCR_HDU_DBGSTATE_RUN;
+                dbg_state_next =type_ycr_hdu_dbgstates_e'( ~pipe2hdu_init_pc_i ? YCR_HDU_DBGSTATE_RESET
+                                                           : dm_dhalt_req        ? YCR_HDU_DBGSTATE_DHALTED
+                                                                                 : YCR_HDU_DBGSTATE_RUN);
             end
             YCR_HDU_DBGSTATE_RUN: begin
-                dbg_state_next = dfsm_update         ? YCR_HDU_DBGSTATE_DHALTED
-                                                     : YCR_HDU_DBGSTATE_RUN;
+                dbg_state_next =type_ycr_hdu_dbgstates_e'( dfsm_update         ? YCR_HDU_DBGSTATE_DHALTED
+                                                                               : YCR_HDU_DBGSTATE_RUN);
             end
             YCR_HDU_DBGSTATE_DHALTED: begin
-                dbg_state_next = ~dfsm_update        ? YCR_HDU_DBGSTATE_DHALTED
-                               : dm_cmd_drun         ? YCR_HDU_DBGSTATE_DRUN
-                                                     : YCR_HDU_DBGSTATE_RUN;
+                dbg_state_next =type_ycr_hdu_dbgstates_e'( ~dfsm_update        ? YCR_HDU_DBGSTATE_DHALTED
+                                                          : dm_cmd_drun         ? YCR_HDU_DBGSTATE_DRUN
+                                                                                : YCR_HDU_DBGSTATE_RUN);
             end
             YCR_HDU_DBGSTATE_DRUN: begin
-                dbg_state_next = dfsm_update         ? YCR_HDU_DBGSTATE_DHALTED
-                                                     : YCR_HDU_DBGSTATE_DRUN;
+                dbg_state_next =type_ycr_hdu_dbgstates_e'( dfsm_update         ? YCR_HDU_DBGSTATE_DHALTED
+                                                                                 : YCR_HDU_DBGSTATE_DRUN);
             end
             default: begin
 `ifdef YCR_XPROP_EN
@@ -595,21 +595,21 @@ end
 always_comb begin
     case (pbuf_fsm_curr)
         YCR_HDU_PBUFSTATE_IDLE: begin
-            pbuf_fsm_next = pbuf_start_fetch       ? YCR_HDU_PBUFSTATE_FETCH
-                                                   : YCR_HDU_PBUFSTATE_IDLE;
+            pbuf_fsm_next = type_ycr_hdu_pbufstates_e'(pbuf_start_fetch       ? YCR_HDU_PBUFSTATE_FETCH
+                                                                              : YCR_HDU_PBUFSTATE_IDLE);
         end
         YCR_HDU_PBUFSTATE_FETCH: begin
-            pbuf_fsm_next = pipe2hdu_exu_exc_req_i ? YCR_HDU_PBUFSTATE_WAIT4END
-                          : pbuf_exc_inj_req       ? YCR_HDU_PBUFSTATE_EXCINJECT
-                                                   : YCR_HDU_PBUFSTATE_FETCH;
+            pbuf_fsm_next = type_ycr_hdu_pbufstates_e'(pipe2hdu_exu_exc_req_i ? YCR_HDU_PBUFSTATE_WAIT4END
+                                                       : pbuf_exc_inj_req     ? YCR_HDU_PBUFSTATE_EXCINJECT
+                                                       : YCR_HDU_PBUFSTATE_FETCH);
         end
         YCR_HDU_PBUFSTATE_EXCINJECT: begin
-            pbuf_fsm_next = pbuf_exc_inj_end       ? YCR_HDU_PBUFSTATE_WAIT4END
-                                                   : YCR_HDU_PBUFSTATE_EXCINJECT;
+            pbuf_fsm_next = type_ycr_hdu_pbufstates_e'(pbuf_exc_inj_end       ? YCR_HDU_PBUFSTATE_WAIT4END
+                                                                              : YCR_HDU_PBUFSTATE_EXCINJECT);
         end
         YCR_HDU_PBUFSTATE_WAIT4END: begin
-            pbuf_fsm_next = hdu2exu_dbg_halted_o   ? YCR_HDU_PBUFSTATE_IDLE
-                                                   : YCR_HDU_PBUFSTATE_WAIT4END;
+            pbuf_fsm_next = type_ycr_hdu_pbufstates_e'(hdu2exu_dbg_halted_o   ? YCR_HDU_PBUFSTATE_IDLE
+                                                                              : YCR_HDU_PBUFSTATE_WAIT4END);
         end
     endcase
 end
@@ -770,9 +770,9 @@ assign csr_dpc_out  = csr_dpc_sel     ? csr_dpc_ff : '0;
 // Debug Scratch 0 register
 //------------------------------------------------------------------------------
 
-assign csr_dscratch0_resp = (~dm2hdu_dreg_resp_i | dm2hdu_dreg_fail_i)
+assign csr_dscratch0_resp =type_ycr_csr_resp_e'( (~dm2hdu_dreg_resp_i | dm2hdu_dreg_fail_i)
                           ? YCR_CSR_RESP_ER
-                          : YCR_CSR_RESP_OK;
+                          : YCR_CSR_RESP_OK);
 assign csr_dscratch0_out  = csr_dscratch0_sel ? dm2hdu_dreg_rdata_i : '0;
 
 //------------------------------------------------------------------------------
@@ -872,10 +872,10 @@ end endgenerate
 
 assign csr_addr_dscratch0 = (csr2hdu_addr_i == YCR_HDU_DBGCSR_OFFS_DSCRATCH0);
 
-assign hdu2csr_resp_o  = ~dbg_state_drun    ? YCR_CSR_RESP_ER
-                       : csr_addr_dscratch0 ? csr_dscratch0_resp
-                       : csr2hdu_req_i      ? YCR_CSR_RESP_OK
-                                            : YCR_CSR_RESP_ER;
+assign hdu2csr_resp_o  =type_ycr_csr_resp_e'( ~dbg_state_drun    ? YCR_CSR_RESP_ER
+                                             : csr_addr_dscratch0 ? csr_dscratch0_resp
+                                             : csr2hdu_req_i      ? YCR_CSR_RESP_OK
+                                             : YCR_CSR_RESP_ER);
 assign hdu2csr_rdata_o = csr_rd_data;
 
 `ifdef YCR_TDU_EN

@@ -97,6 +97,7 @@ module ycr_core_top (
 
 `ifdef YCR_DBG_EN
     // Debug Interface
+    input   logic                                   trst_n  ,
     input   logic                                   tapc_tck,                // Test Clock (TCK)
     input   logic                                   tapc_tms,                // Test Mode Select (TMS)
     input   logic                                   tapc_tdi,                // Test Data Input (TDI)

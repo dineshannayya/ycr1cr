@@ -858,10 +858,10 @@ always_comb begin
             if (command_wr_req | dmi_rpt_command) begin
                 case (1'b1)
                     abs_cmd_csr_ro_access_vd: abs_fsm_next = ABS_STATE_CSR_RO;
-                    abs_cmd_csr_rw_access_vd: abs_fsm_next = hart_state_dhalt ? ABS_STATE_CSR_SAVE_XREG : ABS_STATE_ERR;
-                    abs_cmd_mprf_access_vd  : abs_fsm_next = hart_state_dhalt ? ABS_STATE_XREG_RW       : ABS_STATE_ERR;
+                    abs_cmd_csr_rw_access_vd: abs_fsm_next = type_ycr_abs_fsm_e'(hart_state_dhalt ? ABS_STATE_CSR_SAVE_XREG : ABS_STATE_ERR);
+                    abs_cmd_mprf_access_vd  : abs_fsm_next = type_ycr_abs_fsm_e'(hart_state_dhalt ? ABS_STATE_XREG_RW       : ABS_STATE_ERR);
                     abs_cmd_execprogbuf_req : abs_fsm_next = ABS_STATE_EXEC;
-                    abs_cmd_mem_access_vd   : abs_fsm_next = hart_state_dhalt ? ABS_STATE_MEM_SAVE_XREG : ABS_STATE_ERR;
+                    abs_cmd_mem_access_vd   : abs_fsm_next = type_ycr_abs_fsm_e'(hart_state_dhalt ? ABS_STATE_MEM_SAVE_XREG : ABS_STATE_ERR);
                     default                 : abs_fsm_next = ABS_STATE_ERR;
                 endcase
             end
@@ -887,9 +887,9 @@ always_comb begin
             end
         end
 
-        ABS_STATE_CSR_RO       : abs_fsm_next = abs_err_acc_busy_ff ? ABS_STATE_ERR             : ABS_STATE_IDLE;
-        ABS_STATE_CSR_SAVE_XREG: abs_fsm_next = dhi_resp            ? ABS_STATE_CSR_RW          : ABS_STATE_CSR_SAVE_XREG;
-        ABS_STATE_CSR_RW       : abs_fsm_next = dhi_resp            ? ABS_STATE_CSR_RETURN_XREG : ABS_STATE_CSR_RW;
+        ABS_STATE_CSR_RO       : abs_fsm_next = type_ycr_abs_fsm_e'(abs_err_acc_busy_ff ? ABS_STATE_ERR             : ABS_STATE_IDLE);
+        ABS_STATE_CSR_SAVE_XREG: abs_fsm_next = type_ycr_abs_fsm_e'(dhi_resp            ? ABS_STATE_CSR_RW          : ABS_STATE_CSR_SAVE_XREG);
+        ABS_STATE_CSR_RW       : abs_fsm_next = type_ycr_abs_fsm_e'(dhi_resp            ? ABS_STATE_CSR_RETURN_XREG : ABS_STATE_CSR_RW);
 
         ABS_STATE_CSR_RETURN_XREG: begin
             if (dhi_resp) begin
@@ -902,10 +902,10 @@ always_comb begin
             end
         end
 
-        ABS_STATE_MEM_SAVE_XREG         : abs_fsm_next = dhi_resp ? ABS_STATE_MEM_SAVE_XREG_FORADDR   : ABS_STATE_MEM_SAVE_XREG;
-        ABS_STATE_MEM_SAVE_XREG_FORADDR : abs_fsm_next = dhi_resp ? ABS_STATE_MEM_RW                  : ABS_STATE_MEM_SAVE_XREG_FORADDR;
-        ABS_STATE_MEM_RW                : abs_fsm_next = dhi_resp ? ABS_STATE_MEM_RETURN_XREG         : ABS_STATE_MEM_RW;
-        ABS_STATE_MEM_RETURN_XREG       : abs_fsm_next = dhi_resp ? ABS_STATE_MEM_RETURN_XREG_FORADDR : ABS_STATE_MEM_RETURN_XREG;
+        ABS_STATE_MEM_SAVE_XREG         : abs_fsm_next = type_ycr_abs_fsm_e'(dhi_resp ? ABS_STATE_MEM_SAVE_XREG_FORADDR   : ABS_STATE_MEM_SAVE_XREG);
+        ABS_STATE_MEM_SAVE_XREG_FORADDR : abs_fsm_next = type_ycr_abs_fsm_e'(dhi_resp ? ABS_STATE_MEM_RW                  : ABS_STATE_MEM_SAVE_XREG_FORADDR);
+        ABS_STATE_MEM_RW                : abs_fsm_next = type_ycr_abs_fsm_e'(dhi_resp ? ABS_STATE_MEM_RETURN_XREG         : ABS_STATE_MEM_RW);
+        ABS_STATE_MEM_RETURN_XREG       : abs_fsm_next = type_ycr_abs_fsm_e'(dhi_resp ? ABS_STATE_MEM_RETURN_XREG_FORADDR : ABS_STATE_MEM_RETURN_XREG);
 
         ABS_STATE_MEM_RETURN_XREG_FORADDR: begin
             if (dhi_resp) begin
@@ -1305,12 +1305,12 @@ always_comb begin
         // Normal work
         case (dhi_fsm_ff)
             DHI_STATE_IDLE      : dhi_fsm_next = dhi_req;
-            DHI_STATE_EXEC      : dhi_fsm_next = cmd_resp_ok      ? DHI_STATE_EXEC_RUN   : DHI_STATE_EXEC;
-            DHI_STATE_EXEC_RUN  : dhi_fsm_next = hart_state_drun  ? DHI_STATE_EXEC_HALT  : DHI_STATE_EXEC_RUN;
-            DHI_STATE_HALT_REQ  : dhi_fsm_next = cmd_resp_ok      ? DHI_STATE_EXEC_HALT  : DHI_STATE_HALT_REQ;
-            DHI_STATE_EXEC_HALT : dhi_fsm_next = hart_state_dhalt ? DHI_STATE_IDLE       : DHI_STATE_EXEC_HALT;
-            DHI_STATE_RESUME_REQ: dhi_fsm_next = cmd_resp_ok      ? DHI_STATE_RESUME_RUN : DHI_STATE_RESUME_REQ;
-            DHI_STATE_RESUME_RUN: dhi_fsm_next = hart_state_run   ? DHI_STATE_IDLE       : DHI_STATE_RESUME_RUN;
+            DHI_STATE_EXEC      : dhi_fsm_next = type_ycr_dhi_fsm_e'(cmd_resp_ok      ? DHI_STATE_EXEC_RUN   : DHI_STATE_EXEC);
+            DHI_STATE_EXEC_RUN  : dhi_fsm_next = type_ycr_dhi_fsm_e'(hart_state_drun  ? DHI_STATE_EXEC_HALT  : DHI_STATE_EXEC_RUN);
+            DHI_STATE_HALT_REQ  : dhi_fsm_next = type_ycr_dhi_fsm_e'(cmd_resp_ok      ? DHI_STATE_EXEC_HALT  : DHI_STATE_HALT_REQ);
+            DHI_STATE_EXEC_HALT : dhi_fsm_next = type_ycr_dhi_fsm_e'(hart_state_dhalt ? DHI_STATE_IDLE       : DHI_STATE_EXEC_HALT);
+            DHI_STATE_RESUME_REQ: dhi_fsm_next = type_ycr_dhi_fsm_e'(cmd_resp_ok      ? DHI_STATE_RESUME_RUN : DHI_STATE_RESUME_REQ);
+            DHI_STATE_RESUME_RUN: dhi_fsm_next = type_ycr_dhi_fsm_e'(hart_state_run   ? DHI_STATE_IDLE       : DHI_STATE_RESUME_RUN);
             default             : dhi_fsm_next = dhi_fsm_ff;
         endcase
     end else begin

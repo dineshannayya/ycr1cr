@@ -100,6 +100,8 @@
 ////     2.5:  Nov 7, 2022, Dinesh A                                      ////
 ////           Added Interface to integrate AES core                      ////
 ////           Added Interface to integrate FPU core                      ////
+////     2.6:  Mar 4, 2023, Dinesh A                                      ////
+////           Tap access is enabled                                      ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -306,9 +308,6 @@ localparam int unsigned YCR_CLUSTER_TOP_RST_SYNC_STAGES_NUM            = 2;
 // Reset logic
 logic                                               pwrup_rst_n_sync;
 logic                                               cpu_rst_n_sync;
-`ifdef YCR_DBG_EN
-logic                                               tapc_trst_n;
-`endif // YCR_DBG_EN
 logic [`YCR_NUMCORES-1:0]                           cpu_core_rst_n_sync;        // CPU Reset (Core Reset)
 
 //----------------------------------------------------------------
@@ -404,10 +403,10 @@ ycr_iconnect u_connect (
           .core_clk                     (core_clk_icon_skew           ), // Core clock
 
           .rtc_clk                      (rtc_clk                      ), // Core clock
-	  .pwrup_rst_n                  (pwrup_rst_n                  ),
+	      .pwrup_rst_n                  (pwrup_rst_n                  ),
           .cpu_intf_rst_n               (cpu_intf_rst_n               ), // CPU reset
 
-	  .riscv_debug                  (riscv_debug                  ),
+	      .riscv_debug                  (riscv_debug                  ),
           .cfg_sram_lphase              (cfg_sram_lphase[3:2]         ),
 
           // Interrupt buffering      
@@ -541,8 +540,9 @@ ycr_intf u_intf(
     .wbd_clk_int              (wbd_clk_int               ),
     .wbd_clk_skew             (wbd_clk_skew              ),
 
+
     // Control
-    .pwrup_rst_n               (pwrup_rst_n               ), // Power-Up Reset
+    .pwrup_rst_n              (pwrup_rst_n               ), // Power-Up Reset
     .cpu_intf_rst_n            (cpu_intf_rst_n            ), // CPU interface reset
 
     .cfg_icache_pfet_dis       (cfg_cache_ctrl[0]         ),
@@ -708,7 +708,7 @@ ycr_core_top i_core_top_0 (
           .core_irq_soft_i              (core0_soft_irq               ),
 `ifdef YCR_DBG_EN
     // Debug interface
-          .tapc_trst_n                  (tapc_trst_n                  ),
+          .trst_n                       (trst_n                       ),
           .tapc_tck                     (tck                          ),
           .tapc_tms                     (tms                          ),
           .tapc_tdi                     (tdi                          ),

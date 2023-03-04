@@ -49,7 +49,7 @@
 //------------------------------------------------------------------------------
 
 // YCR1 core identifiers
-`define YCR_MIMPID             32'h22110700 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
+`define YCR_MIMPID             32'h23030400 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
 `define YCR_MVENDORID          32'h00000000
 `define YCR_NUMCORES           32'h00000001
 
@@ -118,10 +118,10 @@
 //  `define YCR_FAST_MUL               // enable fast one-cycle multiplication, otherwise multiplication takes 32 cycles
 //`define YCR_MPRF_RST_EN - yosys fix, two dimensional array init not allowed
   `define YCR_MCOUNTEN_EN            // enable custom MCOUNTEN CSR for counter control
-//`define YCR_DBG_EN                 // enable Debug Subsystem (TAPC, DM, SCU, HDU)
-//`define YCR_TDU_EN                 // enable Trigger Debug Unit (hardware breakpoints)
-//  parameter int unsigned YCR_TDU_TRIG_NUM = 4;
-// `define YCR_TDU_ICOUNT_EN          // enable hardware triggers on instruction counter
+`define YCR_DBG_EN                 // enable Debug Subsystem (TAPC, DM, SCU, HDU)
+`define YCR_TDU_EN                 // enable Trigger Debug Unit (hardware breakpoints)
+  parameter int unsigned YCR_TDU_TRIG_NUM = 4;
+ `define YCR_TDU_ICOUNT_EN          // enable hardware triggers on instruction counter
   `define YCR_IPIC_EN                // enable Integrated Programmable Interrupt Controller
   `define YCR_IPIC_SYNC_EN           // enable IPIC synchronizer
   `define YCR_TCM_EN

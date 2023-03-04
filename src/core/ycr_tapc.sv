@@ -177,22 +177,22 @@ end
 
 always_comb begin
     case (tap_fsm_ff)
-        YCR_TAP_STATE_RESET      : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_RESET        : YCR_TAP_STATE_IDLE;
-        YCR_TAP_STATE_IDLE       : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_SEL_SCAN  : YCR_TAP_STATE_IDLE;
-        YCR_TAP_STATE_DR_SEL_SCAN: tap_fsm_next = tapc_tms ? YCR_TAP_STATE_IR_SEL_SCAN  : YCR_TAP_STATE_DR_CAPTURE;
-        YCR_TAP_STATE_DR_CAPTURE : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_EXIT1     : YCR_TAP_STATE_DR_SHIFT;
-        YCR_TAP_STATE_DR_SHIFT   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_EXIT1     : YCR_TAP_STATE_DR_SHIFT;
-        YCR_TAP_STATE_DR_EXIT1   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_UPDATE    : YCR_TAP_STATE_DR_PAUSE;
-        YCR_TAP_STATE_DR_PAUSE   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_EXIT2     : YCR_TAP_STATE_DR_PAUSE;
-        YCR_TAP_STATE_DR_EXIT2   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_UPDATE    : YCR_TAP_STATE_DR_SHIFT;
-        YCR_TAP_STATE_DR_UPDATE  : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_SEL_SCAN  : YCR_TAP_STATE_IDLE;
-        YCR_TAP_STATE_IR_SEL_SCAN: tap_fsm_next = tapc_tms ? YCR_TAP_STATE_RESET        : YCR_TAP_STATE_IR_CAPTURE;
-        YCR_TAP_STATE_IR_CAPTURE : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_IR_EXIT1     : YCR_TAP_STATE_IR_SHIFT;
-        YCR_TAP_STATE_IR_SHIFT   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_IR_EXIT1     : YCR_TAP_STATE_IR_SHIFT;
-        YCR_TAP_STATE_IR_EXIT1   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_IR_UPDATE    : YCR_TAP_STATE_IR_PAUSE;
-        YCR_TAP_STATE_IR_PAUSE   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_IR_EXIT2     : YCR_TAP_STATE_IR_PAUSE;
-        YCR_TAP_STATE_IR_EXIT2   : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_IR_UPDATE    : YCR_TAP_STATE_IR_SHIFT;
-        YCR_TAP_STATE_IR_UPDATE  : tap_fsm_next = tapc_tms ? YCR_TAP_STATE_DR_SEL_SCAN  : YCR_TAP_STATE_IDLE;
+        YCR_TAP_STATE_RESET      : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_RESET        : YCR_TAP_STATE_IDLE);
+        YCR_TAP_STATE_IDLE       : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_SEL_SCAN  : YCR_TAP_STATE_IDLE);
+        YCR_TAP_STATE_DR_SEL_SCAN: tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_IR_SEL_SCAN  : YCR_TAP_STATE_DR_CAPTURE);
+        YCR_TAP_STATE_DR_CAPTURE : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_EXIT1     : YCR_TAP_STATE_DR_SHIFT);
+        YCR_TAP_STATE_DR_SHIFT   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_EXIT1     : YCR_TAP_STATE_DR_SHIFT);
+        YCR_TAP_STATE_DR_EXIT1   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_UPDATE    : YCR_TAP_STATE_DR_PAUSE);
+        YCR_TAP_STATE_DR_PAUSE   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_EXIT2     : YCR_TAP_STATE_DR_PAUSE);
+        YCR_TAP_STATE_DR_EXIT2   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_UPDATE    : YCR_TAP_STATE_DR_SHIFT);
+        YCR_TAP_STATE_DR_UPDATE  : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_SEL_SCAN  : YCR_TAP_STATE_IDLE);
+        YCR_TAP_STATE_IR_SEL_SCAN: tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_RESET        : YCR_TAP_STATE_IR_CAPTURE);
+        YCR_TAP_STATE_IR_CAPTURE : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_IR_EXIT1     : YCR_TAP_STATE_IR_SHIFT);
+        YCR_TAP_STATE_IR_SHIFT   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_IR_EXIT1     : YCR_TAP_STATE_IR_SHIFT);
+        YCR_TAP_STATE_IR_EXIT1   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_IR_UPDATE    : YCR_TAP_STATE_IR_PAUSE);
+        YCR_TAP_STATE_IR_PAUSE   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_IR_EXIT2     : YCR_TAP_STATE_IR_PAUSE);
+        YCR_TAP_STATE_IR_EXIT2   : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_IR_UPDATE    : YCR_TAP_STATE_IR_SHIFT);
+        YCR_TAP_STATE_IR_UPDATE  : tap_fsm_next = type_ycr_tap_state_e'(tapc_tms ? YCR_TAP_STATE_DR_SEL_SCAN  : YCR_TAP_STATE_IDLE);
 `ifdef YCR_XPROP_EN
         default                   : tap_fsm_next = YCR_TAP_STATE_XXX;
 `else // YCR_XPROP_EN
