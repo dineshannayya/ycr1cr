@@ -79,9 +79,6 @@ module ycr_core_top (
 `endif // YCR_DBG_EN
 
     input   logic [1:0]                             core_uid,        // Unique Core Id 
-`ifdef YCR_DBG_EN
-    input   logic [31:0]                            tapc_fuse_idcode_i,       // Fuse IDCODE value
-`endif // YCR_DBG_EN
 
     // IRQ
 `ifdef YCR_IPIC_EN
@@ -539,6 +536,8 @@ ycr_pipe_top i_pipe_top (
 
 
 `ifdef YCR_DBG_EN
+
+wire [31:0] tapc_fuse_idcode_i = `YCR_TAP_IDCODE;
 //-------------------------------------------------------------------------------
 // TAP Controller (TAPC)
 //-------------------------------------------------------------------------------

@@ -35,6 +35,8 @@
 ////  Revision :                                                          ////
 ////     v0:    Feb 21, 2021, Dinesh A                                    ////
 ////             Initial version                                          ////
+////     v1:    Mar 10, 2023, Dinesh A                                    ////
+////            all cpu clock is branch are routed through iconnect       ////
 ////                                                                      ////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -107,6 +109,8 @@ module ycr_iconnect (
     //------------------------------------------------------------------
     // Toward ycr_intf
     // -----------------------------------------------------------------
+
+    output   logic                          cpu_clk_intf              ,
 
     // Instruction Memory Interface
     input    logic                          core_icache_req_ack       , // IMEM request acknowledge
@@ -286,9 +290,10 @@ logic  [8:0]                      sram1_addr1_int      ; // Address
 //---------------------------------------------------------------------------------
 // Providing cpu clock feed through iconnect for better physical routing
 //---------------------------------------------------------------------------------
-assign core0_clk   = core_clk_int;
-assign cpu_clk_fpu = core_clk_int;
-assign cpu_clk_aes = core_clk_int;
+assign core0_clk    = core_clk_int;
+assign cpu_clk_fpu  = core_clk_int;
+assign cpu_clk_aes  = core_clk_int;
+assign cpu_clk_intf = core_clk_int;
 
 //---------------------------------------------------------------------------------
 // To improve the physical routing irq signal are buffer inside the block
