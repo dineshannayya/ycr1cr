@@ -263,3 +263,44 @@ module ycr_reset_mux2_cell (
 assign rst_n_out = (test_mode == 1'b1) ? test_rst_n : rst_n_in[select];
 
 endmodule : ycr_reset_mux2_cell
+
+
+// Reset Sync Logic
+
+module ycr_reset_sync   (
+	      scan_mode  ,
+          dclk       , // Destination clock domain
+	      arst_n     , // active low async reset
+          srst_n 
+          );
+
+parameter WIDTH = 1;
+
+input    scan_mode  ; // test mode
+input    dclk       ; // Destination clock
+input    arst_n     ; // Async Reset
+output   srst_n     ; // Sync Reset w.r.t dclk
+
+
+reg      in_data_s  ; // One   Cycle sync 
+reg      in_data_2s ; // two   Cycle sync 
+
+
+always @(negedge arst_n  or posedge dclk)
+begin
+   if(arst_n == 1'b0)
+   begin
+      in_data_s  <= 1'b0;
+      in_data_2s <= 1'b0;
+   end
+   else
+   begin
+      in_data_s  <= 1'b1;
+      in_data_2s <= in_data_s;
+   end
+end
+//assign srst_n =  (scan_mode) ? arst_n : in_data_2s;
+ctech_mux2x1 u_buf  (.A0(in_data_2s), .A1(arst_n), .S(scan_mode), .X(srst_n));
+
+endmodule
+

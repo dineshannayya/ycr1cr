@@ -67,6 +67,8 @@ module ycr_pipe_lsu (
     input   logic                               rst_n,                      // LSU reset
     input   logic                               clk,                        // LSU clock
 
+    input   logic                               core_sleep                 , // core sleep indication
+
     // LSU <-> EXU interface
     input   logic                               exu2lsu_req_i,              // Request to LSU
     input   type_ycr_lsu_cmd_sel_e             exu2lsu_cmd_i,              // LSU command
@@ -266,12 +268,27 @@ assign lsu_exc_req = dmem_addr_mslgn_l | dmem_addr_mslgn_s
                    | lsu_exc_hwbrk
 `endif // YCR_TDU_EN
 ;
+//------------------------------------------------------------------------------
+// core sleep wakeup event
+// Generate wakeup event at sleep signal high to low transition
+//------------------------------------------------------------------------------
+logic core_sleep_l;
+
+wire core_wakeup = core_sleep_l & !core_sleep;
+
+always_ff @(posedge clk, negedge rst_n) begin
+    if (~rst_n) begin
+        core_sleep_l <= '0;
+    end else begin
+        core_sleep_l <= core_sleep;
+    end
+end
 
 //------------------------------------------------------------------------------
 // LSU <-> EXU interface
 //------------------------------------------------------------------------------
 
-assign lsu2exu_rdy_o = dmem_resp_received;
+assign lsu2exu_rdy_o = (!core_sleep & dmem_resp_received) | core_wakeup ;
 assign lsu2exu_exc_o = dmem_resp_er | lsu_exc_req;
 
 // Sign- or zero-extending data received from DMEM
@@ -289,7 +306,7 @@ end
 // LSU <-> DMEM interface
 //------------------------------------------------------------------------------
 
-assign lsu2dmem_req_o   = exu2lsu_req_i & ~lsu_exc_req & lsu_fsm_idle;
+assign lsu2dmem_req_o   = exu2lsu_req_i & ~lsu_exc_req & lsu_fsm_idle & !core_sleep_l ; 
 assign lsu2dmem_addr_o  = exu2lsu_addr_i;
 assign lsu2dmem_wdata_o = exu2lsu_sdata_i;
 assign lsu2dmem_cmd_o   = dmem_cmd_store  ? YCR_MEM_CMD_WR : YCR_MEM_CMD_RD;

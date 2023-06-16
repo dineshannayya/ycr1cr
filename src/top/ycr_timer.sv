@@ -59,17 +59,20 @@ module ycr_timer (
     input   logic                                   dmem_req,
     input   logic                                   dmem_cmd,
     input   logic [1:0]                             dmem_width,
-    input   logic [`YCR_DMEM_AWIDTH-1:0]           dmem_addr,
-    input   logic [`YCR_DMEM_DWIDTH-1:0]           dmem_wdata,
+    input   logic [`YCR_DMEM_AWIDTH-1:0]            dmem_addr,
+    input   logic [`YCR_DMEM_DWIDTH-1:0]            dmem_wdata,
     output  logic                                   dmem_req_ack,
-    output  logic [`YCR_DMEM_DWIDTH-1:0]           dmem_rdata,
+    output  logic [`YCR_DMEM_DWIDTH-1:0]            dmem_rdata,
     output  logic [1:0]                             dmem_resp,
 
     // Timer interface
     output  logic [63:0]                            timer_val,
     output  logic                                   timer_irq,
 
-    output  logic [31:0]                            riscv_glbl_cfg
+    output  logic [31:0]                            riscv_glbl_cfg,
+    output  logic [23:0]                            riscv_clk_cfg,
+    output  logic [7:0]                             riscv_sleep,    // riscv core sleep level signal
+    input   logic [7:0]                             riscv_wakeup    // riscv core wakeup trigger
 );
 
 //-------------------------------------------------------------------------------
@@ -83,6 +86,7 @@ localparam logic [YCR_TIMER_ADDR_WIDTH-1:0] YCR_TIMER_MTIMEHI             = 5'hC
 localparam logic [YCR_TIMER_ADDR_WIDTH-1:0] YCR_TIMER_MTIMECMPLO          = 5'h10;
 localparam logic [YCR_TIMER_ADDR_WIDTH-1:0] YCR_TIMER_MTIMECMPHI          = 5'h14;
 localparam logic [YCR_TIMER_ADDR_WIDTH-1:0] YCR_GLBL_CONTROL              = 5'h18;
+localparam logic [YCR_TIMER_ADDR_WIDTH-1:0] YCR_CLK_CONTROL               = 5'h1C;
 
 localparam int unsigned YCR_TIMER_CONTROL_EN_OFFSET                        = 0;
 localparam int unsigned YCR_TIMER_CONTROL_CLKSRC_OFFSET                    = 1;
@@ -107,6 +111,7 @@ logic                                               mtimehi_up;
 logic                                               mtimecmplo_up;
 logic                                               mtimecmphi_up;
 logic                                               glbl_cfg_up;
+logic                                               clk_cfg_up;
 
 logic                                               dmem_req_valid;
 
@@ -203,6 +208,50 @@ always_ff @(posedge clk, negedge rst_n) begin
     end
 end
 
+// Clock control register
+always_ff @(posedge clk, negedge rst_n) begin
+    if (~rst_n) begin
+        riscv_clk_cfg[23:0]    <= '0;
+    end else begin
+        if (clk_cfg_up) begin
+            riscv_clk_cfg[23:0]    <= dmem_wdata[23:0];
+        end 
+    end
+end
+
+
+//------------------------
+// CPU core Sleep Register
+//   Set by CPU writting '1' and clean on wakeup
+//-------------------------
+// As there is large skew difference between wake-up signal from clock gating logic
+// better to double sync it to local clock
+logic [7:0] riscv_wakeup_ss;
+ctech_dsync_high  #(.WB(8)) u_wakeup_dsync(
+              .in_data    ( riscv_wakeup      ),
+              .out_clk    ( clk               ),
+              .out_rst_n  ( rst_n             ),
+              .out_data   ( riscv_wakeup_ss   )
+          );
+
+generate
+   genvar tcnt;
+   for (tcnt = 0; $unsigned(tcnt) < 8; tcnt=tcnt+1) begin : g_sleep
+
+    req_register #(0  ) u_sleep_req (
+    	      .cpu_we       (clk_cfg_up             ),
+    	      .cpu_req      (dmem_wdata[24+tcnt]    ),
+    	      .hware_ack    (riscv_wakeup_ss[tcnt]     ),
+    	      .reset_n      (rst_n                  ),
+    	      .clk          (clk                    ),
+    	      
+    	      //List of Outs
+    	      .data_out      (riscv_sleep[tcnt])
+              );
+
+   end
+   endgenerate
+
 //-------------------------------------------------------------------------------
 // Interrupt pending
 //-------------------------------------------------------------------------------
@@ -278,7 +327,7 @@ always_ff @(negedge rst_n, posedge clk) begin
        dmem_addr_ff <= '0;
     end else begin
        dmem_req_valid <=  (dmem_req) && (dmem_req_ack == 0) &&  (dmem_width == YCR_MEM_WIDTH_WORD) & (~|dmem_addr[1:0]) &
-                          (dmem_addr[YCR_TIMER_ADDR_WIDTH-1:2] <= YCR_TIMER_MTIMECMPHI[YCR_TIMER_ADDR_WIDTH-1:2]);
+                          (dmem_addr[YCR_TIMER_ADDR_WIDTH-1:2] <= YCR_CLK_CONTROL[YCR_TIMER_ADDR_WIDTH-1:2]);
        dmem_req_ack   <= dmem_req & (dmem_req_ack ==0);
        dmem_cmd_ff    <= dmem_cmd;
        dmem_addr_ff   <= dmem_addr[YCR_TIMER_ADDR_WIDTH-1:0];
@@ -301,6 +350,7 @@ always_ff @(negedge rst_n, posedge clk) begin
                         YCR_TIMER_MTIMECMPLO   : dmem_rdata    <= mtimecmp_reg[31:0];
                         YCR_TIMER_MTIMECMPHI   : dmem_rdata    <= mtimecmp_reg[63:32];
                         YCR_GLBL_CONTROL       : dmem_rdata    <= riscv_glbl_cfg;
+                        YCR_CLK_CONTROL        : dmem_rdata    <= {riscv_sleep,riscv_clk_cfg};
                         default                 : begin end
                     endcase
                 end
@@ -319,6 +369,7 @@ always_comb begin
     mtimecmplo_up   = 1'b0;
     mtimecmphi_up   = 1'b0;
     glbl_cfg_up     = 1'b0;
+    clk_cfg_up      = 1'b0;
     if (dmem_req_valid & (dmem_cmd_ff == YCR_MEM_CMD_WR)) begin
         case (dmem_addr_ff)
             YCR_TIMER_CONTROL      : control_up    = 1'b1;
@@ -327,8 +378,9 @@ always_comb begin
             YCR_TIMER_MTIMEHI      : mtimehi_up    = 1'b1;
             YCR_TIMER_MTIMECMPLO   : mtimecmplo_up = 1'b1;
             YCR_TIMER_MTIMECMPHI   : mtimecmphi_up = 1'b1;
-	    YCR_GLBL_CONTROL       : glbl_cfg_up   = 1'b1;
-            default                 : begin end
+	        YCR_GLBL_CONTROL       : glbl_cfg_up   = 1'b1;
+	        YCR_CLK_CONTROL        : clk_cfg_up   = 1'b1;
+            default                : begin end
         endcase
     end
 end

@@ -373,7 +373,7 @@ ycr_top_wb i_top (
     .cfg_ccska_riscv_intf   (4'h0                   ),
     .cfg_ccska_riscv_icon   (4'h0                   ),
     .cfg_ccska_riscv_core0  (4'h0                   ),
-    .core_clk_int           ({2{clk}}               ),
+    .core_clk_int           (clk                    ),
 
 
     .cfg_wcska_riscv_intf   (4'h0                   ),
@@ -402,7 +402,7 @@ ycr_top_wb i_top (
     // Fuses
     //.fuse_mhartid           (fuse_mhartid           ),
 `ifdef YCR_DBG_EN
-    .fuse_idcode            (`YCR_TAP_IDCODE       ),
+    //.fuse_idcode            (`YCR_TAP_IDCODE       ),
 `endif // YCR_DBG_EN
 
 `ifndef SCR1_TCM_MEM
@@ -528,6 +528,7 @@ ycr_top_wb i_top (
     .wbd_dmem_err_i         (wbd_dmem_err_i         ),
 
     .cpu_clk_aes            (),
+    .aes_idle               (1'b0),
     .aes_dmem_req_ack       ( 1'b0),
     .aes_dmem_req           (),
     .aes_dmem_cmd           (),
@@ -538,6 +539,7 @@ ycr_top_wb i_top (
     .aes_dmem_resp          ('h0),
 
     .cpu_clk_fpu            (),
+    .fpu_idle               (1'b0),
     .fpu_dmem_req_ack       ( 1'b0),
     .fpu_dmem_req           (),
     .fpu_dmem_cmd           (),

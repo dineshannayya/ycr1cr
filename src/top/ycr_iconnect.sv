@@ -79,6 +79,7 @@ module ycr_iconnect (
 
     // CORE-0
     output   logic                          core0_clk                 ,
+    output   logic                          core0_sleep               , // core0 sleep indication
     input    logic   [48:0]                 core0_debug               ,
     output   logic     [1:0]                core0_uid                 ,
     output   logic [63:0]                   core0_timer_val           , // Machine timer value
@@ -153,6 +154,7 @@ module ycr_iconnect (
     output   logic [`YCR_DMEM_DWIDTH-1:0]   aes_dmem_wdata            ,
     input    logic [`YCR_DMEM_DWIDTH-1:0]   aes_dmem_rdata            ,
     input    logic [1:0]                    aes_dmem_resp             ,
+    input    logic                          aes_idle                  ,
 
     // FPU DMEM I/F
     output   logic                          cpu_clk_fpu               ,
@@ -164,22 +166,23 @@ module ycr_iconnect (
     output   logic [`YCR_DMEM_DWIDTH-1:0]   fpu_dmem_wdata            ,
     input    logic [`YCR_DMEM_DWIDTH-1:0]   fpu_dmem_rdata            ,
     input    logic [1:0]                    fpu_dmem_resp             ,
+    input    logic                          fpu_idle                  ,
 
 `ifndef YCR_TCM_MEM
     // SRAM-0 PORT-0
-    output  logic                        sram0_clk0,
-    output  logic                        sram0_csb0,
-    output  logic                        sram0_web0,
-    output  logic   [8:0]                sram0_addr0,
-    output  logic   [3:0]                sram0_wmask0,
-    output  logic   [31:0]               sram0_din0,
-    input   logic   [31:0]               sram0_dout0,
+    output  logic                           sram0_clk0                ,
+    output  logic                           sram0_csb0                ,
+    output  logic                           sram0_web0                ,
+    output  logic   [8:0]                   sram0_addr0               ,
+    output  logic   [3:0]                   sram0_wmask0              ,
+    output  logic   [31:0]                  sram0_din0                ,
+    input   logic   [31:0]                  sram0_dout0               ,
 
     // SRAM-0 PORT-1
-    output  logic                        sram0_clk1,
-    output  logic                        sram0_csb1,
-    output  logic  [8:0]                 sram0_addr1,
-    input   logic  [31:0]                sram0_dout1
+    output  logic                           sram0_clk1                ,
+    output  logic                           sram0_csb1                ,
+    output  logic  [8:0]                    sram0_addr1               ,
+    input   logic  [31:0]                   sram0_dout1
 
 `endif
 
@@ -254,6 +257,9 @@ logic [1:0]                                        timer_dmem_resp;
 `endif
 
 logic [31:0]                                       riscv_glbl_cfg          ;   
+logic [23:0]                                       riscv_clk_cfg           ;   
+logic [7:0]                                        riscv_sleep             ;
+logic [7:0]                                        riscv_wakeup            ;
 logic [63:0]                                       timer_val               ;                // Machine timer value
 logic                                              timer_irq               ;
 logic [`YCR_DMEM_AWIDTH-1:0]                       aes_dmem_addr_tmp       ;
@@ -290,10 +296,38 @@ logic  [8:0]                      sram1_addr1_int      ; // Address
 //---------------------------------------------------------------------------------
 // Providing cpu clock feed through iconnect for better physical routing
 //---------------------------------------------------------------------------------
-assign core0_clk    = core_clk_int;
-assign cpu_clk_fpu  = core_clk_int;
-assign cpu_clk_aes  = core_clk_int;
-assign cpu_clk_intf = core_clk_int;
+
+
+assign      core0_sleep = riscv_sleep[0];
+//assign      core1_sleep = riscv_sleep[1];
+
+ycr_cclk_ctrl_top u_cclk_gate (
+     .rst_n              (cpu_intf_rst_n      ) ,
+     .core_clk_int       (core_clk_int        ) , // core clock without skew
+                                             
+     .riscv_clk_cfg      (riscv_clk_cfg[23:0] ) ,
+     .aes_idle           (aes_idle            ) ,
+     .aes_req            (aes_dmem_req        ) ,
+                                             
+     .fpu_idle           (fpu_idle            ) ,
+     .fpu_req            (fpu_dmem_req        ) ,
+                                             
+     .riscv_sleep        (riscv_sleep         ) ,
+     .riscv_wakeup       (riscv_wakeup        ) ,
+                                             
+     .timer_irq          (timer_irq           ) ,
+     .core_irq_lines_i   (core_irq_lines_i    ) , // External interrupt request lines
+     .core_irq_soft_i    (core_irq_soft_i     ) , // Software generated interrupt request
+                                             
+     .core0_clk          (core0_clk           ) ,
+     .core1_clk          (                    ) ,
+     .cpu_clk_fpu        (cpu_clk_fpu         ) ,
+     .cpu_clk_aes        (cpu_clk_aes         ) ,
+     .cpu_clk_intf       (cpu_clk_intf        ) 
+
+
+    );
+
 
 //---------------------------------------------------------------------------------
 // To improve the physical routing irq signal are buffer inside the block
@@ -326,7 +360,9 @@ assign fpu_dmem_addr            = fpu_dmem_addr_tmp[4:0];
 // changed buf to max with select tied=0
 //ctech_clk_buf u_lineclk_buf  (.A(line_clk_16x_in),  .X(line_clk_16x));
 logic core_clk_cts;
-ctech_mux2x1 u_cclk_cts  (.A0(core_clk), .A1(1'b0), .S(1'b0), .X(core_clk_cts));
+logic core_clk_g;
+ctech_clk_gate u_cclk_g (.GATE (1'b1), . CLK(core_clk), .GCLK(core_clk_g));
+ctech_mux2x1 u_cclk_cts  (.A0(core_clk_g), .A1(1'b0), .S(1'b0), .X(core_clk_cts));
 
 //--------------------------------------------
 // RISCV clock skew control
@@ -554,7 +590,7 @@ ycr_tcm #(
     .YCR_TCM_SIZE  (`YCR_DMEM_AWIDTH'(~YCR_TCM_ADDR_MASK + 1'b1))
 ) i_tcm (
     .clk            (core_clk_cts         ), // core clock with cts
-    .clk_src        (core_clk             ), // core clk without cts
+    .clk_src        (core_clk_g           ), // core clk without cts
     .rst_n          (cpu_intf_rst_n_sync  ),
 
 `ifndef YCR_TCM_MEM
@@ -693,7 +729,10 @@ ycr_timer i_timer (
     .timer_val      (timer_val         ),
     .timer_irq      (timer_irq         ),
 
-    .riscv_glbl_cfg (riscv_glbl_cfg    )
+    .riscv_glbl_cfg (riscv_glbl_cfg    ),
+    .riscv_clk_cfg  (riscv_clk_cfg     ),
+    .riscv_sleep    (riscv_sleep       ),
+    .riscv_wakeup   (riscv_wakeup      )
 );
 
 

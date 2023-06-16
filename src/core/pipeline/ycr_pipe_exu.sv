@@ -93,6 +93,8 @@ module ycr_pipe_exu (
     input   logic                               clk_pipe_en,                // EXU clock enabled flag
 `endif // YCR_CLKCTRL_EN
 
+    input   logic                               core_sleep                 , // core sleep indication
+
     // EXU <-> IDU interface
     input   logic                               idu2exu_req_i,              // Request form IDU to EXU
     output  logic                               exu2idu_rdy_o,              // EXU ready for new data from IDU
@@ -788,6 +790,7 @@ assign lsu_req  = ((exu_queue.lsu_cmd != YCR_LSU_CMD_NONE) & exu_queue_vd);
 ycr_pipe_lsu i_lsu(
     .rst_n                      (rst_n                   ),
     .clk                        (clk                     ),
+    .core_sleep                 (core_sleep              ),
 
     // EXU <-> LSU interface
     .exu2lsu_req_i              (lsu_req                 ),       // Request to LSU
@@ -817,14 +820,17 @@ ycr_pipe_lsu i_lsu(
     .dmem2lsu_resp_i            (dmem2exu_resp_i         )        // DMEM response
 );
 
+
+
 //------------------------------------------------------------------------------
 // EXU status logic
 //------------------------------------------------------------------------------
 
 // EXU ready flag
+// Allow lsu_rdy only when core sleep is not asserted
 always_comb begin
     case (1'b1)
-        lsu_req                 : exu_rdy = lsu_rdy | lsu_exc_req;
+        lsu_req                 : exu_rdy = (!core_sleep & lsu_rdy) | lsu_exc_req;
 `ifdef YCR_RVM_EXT
         ialu_vd                 : exu_rdy = ialu_rdy;
 `endif // YCR_RVM_EXT

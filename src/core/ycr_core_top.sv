@@ -80,6 +80,8 @@ module ycr_core_top (
 
     input   logic [1:0]                             core_uid,        // Unique Core Id 
 
+    input   logic                                   core_sleep, // force core sleep
+
     // IRQ
 `ifdef YCR_IPIC_EN
     input   logic [YCR_IRQ_LINES_NUM-1:0]          core_irq_lines_i,         // External interrupt request lines
@@ -382,6 +384,13 @@ ycr_data_sync_cell #(
     .data_out            (core_rst_n_status_sync)
 );
 
+
+assign core_rst_status      = ~core_rst_n_status_sync;
+assign core_rdc_qlfy_o      = core_rst_n_qlfy;
+
+`endif // YCR_DBG_EN
+assign core_rst_n_o         = core_rst_n;
+
 `ifdef YCR_DBG_EN
 // TAPC Reset
 ycr_reset_and2_cell i_tapc_rstn_and2_cell (
@@ -391,13 +400,6 @@ ycr_reset_and2_cell i_tapc_rstn_and2_cell (
     .rst_n_out      (tapc_trst_n     )
 );
 `endif // YCR_DBG_EN
-
-assign core_rst_status      = ~core_rst_n_status_sync;
-assign core_rdc_qlfy_o      = core_rst_n_qlfy;
-
-`endif // YCR_DBG_EN
-assign core_rst_n_o         = core_rst_n;
-
 //-------------------------------------------------------------------------------
 // Retiming block to break the Timing Path
 //-------------------------------------------------------------------------------
@@ -469,6 +471,7 @@ ycr_pipe_top i_pipe_top (
     .clkctl2pipe_clk_dbgc_i         (clk_dbgc               ),
     .clkctl2pipe_clk_en_i           (clk_pipe_en            ),
 `endif // YCR_CLKCTRL_EN
+    .core_sleep                     (core_sleep             ),
 
     // Instruction memory interface
     .pipe2imem_req_o                (core2imem_req_int      ),
@@ -537,7 +540,7 @@ ycr_pipe_top i_pipe_top (
 
 `ifdef YCR_DBG_EN
 
-wire [31:0] tapc_fuse_idcode_i = `YCR_TAP_IDCODE;
+wire [31:0] tapc_fuse_idcode_i = {`YCR_TAP_VER_IDCODE,`YCR_TAP_PART_IDCODE,2'b00,core_uid[1:0],`YCR_TAP_MANU_IDCODE,1'b1};
 //-------------------------------------------------------------------------------
 // TAP Controller (TAPC)
 //-------------------------------------------------------------------------------

@@ -72,6 +72,8 @@ module ycr_pipe_top (
 `endif // YCR_DBG_EN
     input   logic                                       clk,                        // Pipe clock
 
+    input   logic                                      core_sleep                 , // core sleep indication
+
     // Instruction Memory Interface
     output  logic                                       pipe2imem_req_o,            // IMEM request
     output  logic                                       pipe2imem_cmd_o,            // IMEM command
@@ -410,6 +412,7 @@ ycr_pipe_exu i_pipe_exu (
     .clk_pipe_en                    (clkctl2pipe_clk_en_i),
 `endif // YCR_CLKCTRL_EN
 
+    .core_sleep                     (core_sleep              ),
     // IDU <-> EXU interface
     .idu2exu_req_i                  (idu2exu_req             ),
     .exu2idu_rdy_o                  (exu2idu_rdy             ),

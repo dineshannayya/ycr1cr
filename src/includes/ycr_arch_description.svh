@@ -49,8 +49,8 @@
 //------------------------------------------------------------------------------
 
 // YCR1 core identifiers
-`define YCR_MIMPID             32'h23030400 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
-`define YCR_MVENDORID          32'h00000000
+`define YCR_MIMPID             32'h23060100 // <YY[7:0]:MON[7:0]:DAY[7:0]:INTRA DAY[7:0]>
+`define YCR_MVENDORID          32'h52444530 // RDS0 - RiscDuino S0
 `define YCR_NUMCORES           32'h00000001
 
 // Width of main registers and buses
@@ -61,8 +61,20 @@
 `define YCR_DMEM_DWIDTH        `YCR_XLEN
 `define YCR_IMEM_BSIZE         3          // BURST SIZE
 
-// TAP IDCODE
-`define YCR_TAP_IDCODE         'hDEB11001
+/****************************
+ TAP IDCODE
+31-28  - 4 bit Version
+27-16  - 12 bit Part Number 
+15-12  - 4 bit Core Number
+11-1   - 11 bit Manufacturer
+0      - Pre-set to logic 1
+
+*****************************/
+
+//`define YCR_TAP_IDCODE         'hDEB11001
+`define YCR_TAP_VER_IDCODE   4'hD
+`define YCR_TAP_PART_IDCODE  12'hEB1
+`define YCR_TAP_MANU_IDCODE  11'h000
 
 
 `ifdef YCR_ARCH_CUSTOM
