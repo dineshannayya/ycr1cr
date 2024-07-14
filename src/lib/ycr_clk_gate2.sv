@@ -34,6 +34,8 @@ parameter  WAIT_TIMER    = 2'b10;
 
 
 logic [1:0] wcnt; // wait cnt
+logic [2:0] cfg_mode_ss;
+logic       irq;
 
 //----------------------------------------------
 // Double Sync the dst_idle signal to match clock skew + Riscv core to detect sleep command with clock 
@@ -109,7 +111,6 @@ end
 //----------------------------------------------
 // Double Sync the config signal to match clock skew 
 //----------------------------------------------
-logic [2:0] cfg_mode_ss;
 
 ctech_dsync_high  #(.WB(3)) u_dsync(
               .in_data    ( cfg_mode     ),
@@ -119,7 +120,7 @@ ctech_dsync_high  #(.WB(3)) u_dsync(
           );
 
 // Note: IRQ already double sync at outside the module
-wire irq = irq1 | irq2 | irq3;
+assign irq = irq1 | irq2 | irq3;
 
 always_comb begin
    case(cfg_mode_ss)
